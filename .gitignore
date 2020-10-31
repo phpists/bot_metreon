@@ -25,7 +25,7 @@ yarn-error.log
 .mc/
 .ssh/
 .viminfo
-.htaccess
+#.htaccess
 /public/uploads/
 #/public/vendor/
 /public/webhook.php
