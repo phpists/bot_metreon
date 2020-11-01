@@ -102,7 +102,7 @@ class CategoryController extends MyAdminController {
 				$form->switch('public'		, __('admin.public'));
 				
 				$form->decimal('sort'		, __('admin.subcategory.sort'))->rules('required');
-				$form->text('name'			, __('admin.subcategory.name'))->rules('required|min:3|max:100');
+				$form->text('name'			, __('admin.subcategory.name'))->rules('required|min:1|max:100');
 			});
 		});
 		
