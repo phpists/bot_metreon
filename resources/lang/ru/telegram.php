@@ -22,4 +22,9 @@ return [
     'request_send'              => 'Ваша заявка отправлена на обработку',
     
     'new_request'			    => "Новая заявка!\n\nID: :id\nЛогин: :username\nИмя: :fio\n\n:note",
+    
+    'actions'				    => [
+        'approved'  => 'Одобрить',
+        'rejected'  => 'Отказать'
+    ]
 ];

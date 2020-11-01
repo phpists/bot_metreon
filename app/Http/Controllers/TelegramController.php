@@ -535,16 +535,49 @@ class TelegramController extends Controller{
             'text'			=> __('telegram.request_send')
         ]);
         
-        $this->sendMessages(
-            [
+        //
+        
+        $chats = DB::table('admins')->where('notify', 1)->get();
+        
+        if(count($chats)){
+			$message = trans('telegram.new_request', [
                 'id'        => $client->id,
                 'username'  => $username,
                 'fio'       => $client->name,
                 'note'      => $text
-            ], 
-            'new_request', 
-            false
-        );
+            ]);
+            
+            $keyboard = [
+                [
+                    [
+                        "text"			=> __('telegram.actions.approved'),
+                        "callback_data"	=> 'approved-'.$client->id
+                    ],
+                    [
+                        "text"			=> __('telegram.actions.rejected'),
+                        "callback_data"	=> 'rejected-'.$client->id
+                    ]
+                ]
+            ];
+            
+            $inline_keyboard = json_encode([
+                'inline_keyboard'	=> $keyboard
+            ]);
+			
+			foreach($chats as $item){
+				$this->sendMessage(
+					[
+						'chat_id'		=> $item->chat_id,
+						'text'			=> $message,
+						'parse_mode'	=> 'Markdown',
+                        'reply_markup'	=> $inline_keyboard
+					],
+					"sendMessage", 
+					true, 
+					true
+				);
+			}
+		}
     }
     
     function commandMenu(&$telegram, $chat_id, $hide_keyboard = true, $mini = false){
