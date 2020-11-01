@@ -261,6 +261,9 @@ class TelegramController extends Controller{
 								$params[$h[0]] = $h[1];
 							}
 						}
+						
+						file_put_contents($dir.'/'.$time.'.result', "\nparams:\n", FILE_APPEND);
+						file_put_contents($dir.'/'.$time.'.result', print_r($params, true), FILE_APPEND);
 					}
 				}
 			}else{
