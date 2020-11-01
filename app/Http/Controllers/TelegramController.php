@@ -1041,11 +1041,11 @@ class TelegramController extends Controller{
 		$keyboard	= [
 			[
 				[
-					"text"		    => __('telegram.remove'),
+					"text"		    => __('telegram.remove_btn'),
 					"callback_data" => 'remove-'.$product->id
 				],
 				[
-					"text"		    => __('telegram.order'),
+					"text"		    => __('telegram.order_btn'),
 					"callback_data" => 'order'
 				],
 				[
