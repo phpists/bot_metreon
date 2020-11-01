@@ -21,5 +21,5 @@ return [
     
     'request_send'              => 'Ваша заявка отправлена на обработку',
     
-    'new_request'			    => "Новая заявка!\n\nID: :id\nКонтакт: :username\n\n:note",
+    'new_request'			    => "Новая заявка!\n\nID: :id\nЛогин: :username\nИмя: :fio\n\n:note",
 ];
