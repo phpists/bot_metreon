@@ -99,6 +99,8 @@ class ClientsController extends MyAdminController {
         $form->text('phone'			, __('admin.clients.phone'))->rules('min:9|max:21');
 		
 		$form->text('address'		, __('admin.clients.address'))->rules('max:200');
+        
+        $form->decimal('chat_id'	, __('admin.clients.chat_id'));
 		
 		// callback before save
 		$form->saving(function (Form $form){
