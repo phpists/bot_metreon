@@ -860,7 +860,8 @@ class TelegramController extends Controller{
 				$items[] = [
 					[
 						"text"								=> $item->name,
-						"switch_inline_query_current_chat"	=> 'cat-'.$item->id
+                        "callback_data"                     => 'cat-'.$item->id
+						//"switch_inline_query_current_chat"	=> 'cat-'.$item->id
 					]
 				];
 			}
