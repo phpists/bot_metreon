@@ -274,14 +274,6 @@ class TelegramController extends Controller{
 				
 				$telegram->answerCallbackQuery($answer);
 				
-				if($command == 'menu'){
-					$chat_id	= $result["callback_query"]["from"]["id"];
-					
-					$this->commandMenu($telegram, $chat_id, false);
-					
-					return;
-				}
-				
 				if($command == 'cart'){
 					$chat_id	= $result["callback_query"]["from"]["id"];
 					
@@ -291,40 +283,9 @@ class TelegramController extends Controller{
 				}
 				
 				if($command == 'start'){
-					$chat_id	= $result["callback_query"]["from"]["id"];
-					
-					$keyboard	= [
-						[
-						]
-					];
-					
-					$reply_markup = $telegram->replyKeyboardMarkup([
-						'keyboard'			=> $keyboard, 
-						'resize_keyboard'	=> true, 
-						'one_time_keyboard'	=> false
-					]);
-					
-					$answer = "Повертаємось у Головне меню ↩️";
-					
-					$telegram->sendMessage([
-						'chat_id'		=> $chat_id, 
-						'text'			=> $answer,
-						'reply_markup'	=> $reply_markup
-					]);
-					
-					$answer = "";
-					
-					$tmp = Contents::query()->where('key', 'introductory-message')->where('public', '1')->first();
-					
-					if($tmp){
-						$answer = trim($tmp->text);
-					}
-					
-					$telegram->sendMessage([
-						'chat_id'		=> $chat_id, 
-						'text'			=> $answer,
-						'reply_markup'	=> $reply_markup
-					]);
+                    $chat_id	= $result["callback_query"]["from"]["id"];
+                    
+					$this->commandStart($telegram, $chat_id);
 					
 					return;
 				}
@@ -555,6 +516,8 @@ class TelegramController extends Controller{
             'chat_id'		=> $client->chat_id, 
             'text'			=> __('telegram.request_approved')
         ]);
+        
+        $this->commandStart($telegram, $client->chat_id);
     }
     
     function commandRejected(&$telegram, $result, $chat_id, $client_id){
@@ -908,6 +871,13 @@ class TelegramController extends Controller{
 				];
 			}
 		}
+        
+        $items[] = [
+            [
+                "text"		    => __('telegram.back'),
+                "callback_data" => 'start'
+            ]
+        ];
         
 		$inline_keyboard = json_encode([
 			'inline_keyboard'	=> $items
