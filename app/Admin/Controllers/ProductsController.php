@@ -48,6 +48,14 @@ class ProductsController extends MyAdminController {
         
         $grid->column('name'			, __('admin.products.name'));
         
+        $grid->column('price'			, __('admin.products.price'))->display(function($price){
+            if($price){
+                return $price.' '.__('admin.products.rub');
+            }
+            
+            return '-';
+        });
+        
         $grid->column('category'		, __('admin.products.category'))->display(function($category){
 			if($category){
 				if(is_array($category)){
@@ -127,7 +135,7 @@ class ProductsController extends MyAdminController {
 			
 			$form->text('name'			, __('admin.products.name'))->rules('required|min:3|max:100');
 			
-			$form->decimal('price'		, __('admin.products.price'))->help(__('admin.products.uah'));
+			$form->decimal('price'		, __('admin.products.price'))->help(__('admin.products.rub'));
 			
 			$category = Category::orderBy('sort', 'asc')->get()->pluck('name', 'id')->toArray();
 			
