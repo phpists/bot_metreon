@@ -24,7 +24,7 @@ class CategoryController extends MyAdminController {
      *
      * @var string
      */
-    protected $title = 'Категорії';
+    protected $title = 'Категории';
 	
     /**
      * Make a grid builder.

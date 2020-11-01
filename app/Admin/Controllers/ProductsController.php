@@ -26,7 +26,7 @@ class ProductsController extends MyAdminController {
      *
      * @var string
      */
-    protected $title = 'Товари';
+    protected $title = 'Товары';
 	
     /**
      * Make a grid builder.
