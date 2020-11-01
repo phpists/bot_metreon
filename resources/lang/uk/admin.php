@@ -134,17 +134,19 @@ return [
 		'description'			=> 'Опис',
 		'content'				=> 'Контент',
     ],
-    'name_article'			=> 'Назва статті',
-    'categories'			=> 'Рубрики',
-    'announcement_image'	=> 'Зображення анонсу',
-    'main_image'			=> 'Головне зображення',
-    'content_codes'			=> 'Коди елементів: [image:№], [slider], [video]',
     'images'				=> 'Зображення',
-    'sort_img'				=> 'Порядковий номер зображення',
-    'slider'				=> 'Слайдер',
-    'slider_alt'			=> 'Підпис слайдера',
     'max_len'				=> 'Максимум :max символів',
     'youtube_url'			=> 'Посилання на відео (YouTube)',
     
     'noindex'				=> 'Не індексувати',
+    
+    'category'				=> [
+		'created_at'			=> 'Створено',
+		'updated_at'			=> 'Оновлено',
+		
+		'info'					=> 'Основна інформація',
+		'name'					=> 'Назва',
+		
+		'sort'					=> 'Порядковий номер',
+    ],
 ];
