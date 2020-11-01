@@ -252,7 +252,7 @@ class TelegramController extends Controller{
 					if($command == 'data'){
 						$hash = explode("&", $hash);
 						
-						$params = [];
+						$params = ['type' => ''];
 						
 						foreach($hash as $h){
 							$h = explode("=", $h);
