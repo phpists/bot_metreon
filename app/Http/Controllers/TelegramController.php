@@ -427,6 +427,11 @@ class TelegramController extends Controller{
     }
     
     function commandStart(&$telegram, $chat_id){
+        //Клавиатура
+        $keyboard	= [
+			[]
+		];
+        
         $reply_markup = $telegram->replyKeyboardMarkup([
             'keyboard'			=> $keyboard, 
             'resize_keyboard'	=> true, 
