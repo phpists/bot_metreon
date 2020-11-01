@@ -59,7 +59,7 @@ class ClientsController extends MyAdminController {
 		
         $grid->column('status'			, __('admin.clients.status.label'))->display(function($status){
             if($status){
-                return __('admin.products.status.'.$status);
+                return __('admin.clients.status.'.$status);
             }
             
             return '-';
@@ -81,9 +81,9 @@ class ClientsController extends MyAdminController {
             
             $filter->equal('status'			, __('admin.clients.status.label'))->radio([
                 null        => __('admin.filter-all'), 
-                'new'       => __('admin.products.status.new'),
-                'approved'  => __('admin.products.status.approved'),
-                'rejected'  => __('admin.products.status.rejected')
+                'new'       => __('admin.clients.status.new'),
+                'approved'  => __('admin.clients.status.approved'),
+                'rejected'  => __('admin.clients.status.rejected')
             ]);
 		});
 		
@@ -119,9 +119,9 @@ class ClientsController extends MyAdminController {
         
         $form->radio('status'       , __('admin.clients.status.label'))
 						->options([
-							'new'       => __('admin.products.status.new'),
-                            'approved'  => __('admin.products.status.approved'),
-                            'rejected'  => __('admin.products.status.rejected')
+							'new'       => __('admin.clients.status.new'),
+                            'approved'  => __('admin.clients.status.approved'),
+                            'rejected'  => __('admin.clients.status.rejected')
 						])
 						->default('new')
 						->rules('required');
