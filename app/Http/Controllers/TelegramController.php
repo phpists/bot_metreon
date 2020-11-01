@@ -285,7 +285,7 @@ class TelegramController extends Controller{
 				if($command == 'start'){
                     $chat_id	= $result["callback_query"]["from"]["id"];
                     
-					$this->commandStart($telegram, $chat_id);
+					$this->commandCategoryList($telegram, $chat_id);
 					
 					return;
 				}
