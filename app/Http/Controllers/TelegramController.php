@@ -517,7 +517,7 @@ class TelegramController extends Controller{
             'text'			=> __('telegram.request_approved')
         ]);
         
-        $this->commandStart($telegram, $client->chat_id);
+        $this->commandCategoryList($telegram, $client->chat_id);
     }
     
     function commandRejected(&$telegram, $result, $chat_id, $client_id){
