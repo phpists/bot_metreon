@@ -13,4 +13,5 @@ Route::group([
     $router->get('/auth/logout', 'AuthController@logout')->name('admin.logout');
     
     $router->resource('category'			, CategoryController::class);
+    $router->resource('products'			, ProductsController::class);
 });
