@@ -80,7 +80,7 @@ class TelegramController extends Controller{
                     }
                     
                     if($message->type == "request"){
-                        $this->commandRequest($telegram, $result, $text, $chat_id, $client, $username);
+                        $this->commandRequest($telegram, $result, $text, $chat_id, $client);
                         
                         $message    = null;
                         $text       = null;
@@ -468,7 +468,7 @@ class TelegramController extends Controller{
         ]);
     }
     
-    function commandRequest(&$telegram, $result, $text, $chat_id, $client, $username){
+    function commandRequest(&$telegram, $result, $text, $chat_id, $client){
         $text = preg_replace('/[^a-zA-Zа-яА-ЯіІёЁъЪєЄїЇ0-9\:\-\(\)\.\, ]/ui', '', $text);
 		$text = trim($text);
         
@@ -492,15 +492,39 @@ class TelegramController extends Controller{
             return false;
         }
         
+        $username = isset($result["message"]["from"]["username"]) ? $result["message"]["from"]["username"] : "";
+        
+        $fio = [];
+        
+        $first_name = isset($result["message"]["from"]["first_name"]) ? $result["message"]["from"]["first_name"] : "";
+        $last_name  = isset($result["message"]["from"]["last_name"]) ? $result["message"]["from"]["last_name"] : "";
+        
+        if($last_name){
+            $fio[] = $last_name;
+        }
+        
+        if($first_name){
+            $fio[] = $first_name;
+        }
+        
         if(!$client){
             $client = Clients::create([
                 'chat_id'   => $chat_id,
                 'username'  => $username,
+                'name'      => implode(" ", $fio),
                 'note'      => $text
             ]);
         }else{
             $client->note       = $text;
-            $client->username   = $username;
+            
+            if($username){
+                $client->username   = $username;
+            }
+            
+            if($fio){
+                $client->name       = implode(" ", $fio);
+            }
+            
             $client->save();
         }
         
