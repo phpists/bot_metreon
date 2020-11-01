@@ -362,7 +362,7 @@ class TelegramController extends Controller{
                             ];
                             
                             $inline_keyboard = [
-                                'inline_keyboard'	=> $items
+                                'inline_keyboard'	=> $keyboard
                             ];
                             
                             $answer['results'][] = [
