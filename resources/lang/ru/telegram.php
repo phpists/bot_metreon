@@ -49,5 +49,9 @@ return [
     
     'select_count'                  => "Выберите количество с кнопок ниже ⤵️",
     
-    'rub'                           => "₽"
+    'rub'                           => "₽",
+    
+    'added_to_cart'              	=> 'Добавлено в корзину',
+    
+    'product_info'              	=> ":count шт. x :price₽  = :amount₽",
 ];

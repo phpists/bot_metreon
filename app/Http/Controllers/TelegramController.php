@@ -262,8 +262,9 @@ class TelegramController extends Controller{
 							}
 						}
 						
-						file_put_contents($dir.'/'.$time.'.result', "\nparams:\n", FILE_APPEND);
-						file_put_contents($dir.'/'.$time.'.result', print_r($params, true), FILE_APPEND);
+						if($params['type'] == 'count'){
+							$this->commandAdd($telegram, $chat_id, $id, $params);
+						}
 					}
 				}
 			}else{
@@ -975,68 +976,18 @@ class TelegramController extends Controller{
     
 	//
 	
-	// кількість
-	function commandCount(&$telegram, $chat_id, $id, $params){
-		//$packaging = ProductsPackaging::query()->where('product_id', $id)->where('packaging_id', $params['packaging'])->first();
-		
-		$items = [[], []];
-		
-		$params['count'] = 1;
-		
-		$items[0][0] = [
-			"text"			=> 1,
-			"callback_data"	=> 'data-'.$id.'#'.http_build_query($params)
-		];
-		
-		$params['count'] = 2;
-		
-		$items[0][1] = [
-			"text"			=> 2,
-			"callback_data"	=> 'data-'.$id.'#'.http_build_query($params)
-		];
-		
-		$params['count'] = 3;
-		
-		$items[1][0] = [
-			"text"			=> 3,
-			"callback_data"	=> 'data-'.$id.'#'.http_build_query($params)
-		];
-		
-		$params['count'] = 4;
-		
-		$items[1][1] = [
-			"text"			=> 4,
-			"callback_data"	=> 'data-'.$id.'#'.http_build_query($params)
-		];
-		
-		$items[] = [
-			[
-				"text"			=> "↩️ До товарів",
-				"callback_data"	=> 'menu'
-			]
-		];
-		
-		$inline_keyboard = json_encode([
-			'inline_keyboard'	=> $items
-		]);
-		
-		$this->sendMessage([
-			'chat_id'				=> $chat_id, 
-			'text'					=> "Оберіть кількість ⤵️",
-			'reply_markup'			=> $inline_keyboard
-		]);
-	}
-	
 	// додавання в корзину
 	function commandAdd(&$telegram, $chat_id, $id, $params){
 		\Cart::session($chat_id);
 		
 		$product = Products::query()
 							->leftJoin('category', 'category.id', '=', 'products.cat_id')
+							->leftJoin('subcategory', 'subcategory.id', '=', 'products.sub_id')
 							->where('products.id', $id)
 							->select(
 								DB::raw('products.*'), 
-								'category.name as cat_name'
+								'category.name as cat_name',
+								'subcategory.name as sub_name'
 							)
 							->first();
 		
@@ -1046,6 +997,8 @@ class TelegramController extends Controller{
 				'price'				=> $product->price,
 				'quantity'			=> $params['count'],
 				'attributes'		=> array(
+					'category'				=> $product->cat_name,
+					'subcategory'			=> $product->sub_name,
 				)
 			));
 		}else{
@@ -1055,13 +1008,15 @@ class TelegramController extends Controller{
 				'price'				=> $product->price,
 				'quantity'			=> $params['count'],
 				'attributes'		=> array(
+					'category'				=> $product->cat_name,
+					'subcategory'			=> $product->sub_name,
 				)
 			));
 		}
 		
 		//
 		
-		$answer = "Додано у 🛒";
+		$answer = __('telegram.added_to_cart')." 🛒";
 		
 		$reply_markup = $telegram->replyKeyboardHide([
 			'hide_keyboard' => true,
@@ -1076,23 +1031,42 @@ class TelegramController extends Controller{
 		
 		sleep(1);
 		
-		$answer = "Повертаємось у Головне меню ↩️";
+		$answer = $product->name."\n️";
+		$answer .= __('telegram.product_info', [
+			'count'		=> $params['count'],
+			'price'		=> $product->price,
+			'amount'	=> $product->price * $params['count'],
+		]);
 		
 		$keyboard	= [
-			[]
+			[
+				[
+					"text"		    => __('telegram.remove'),
+					"callback_data" => 'remove-'.$product->id
+				],
+				[
+					"text"		    => __('telegram.order'),
+					"callback_data" => 'order'
+				],
+				[
+					"text"		    => __('telegram.back'),
+					"switch_inline_query_current_chat"	=> 'sub-'.$product->sub_id
+				]
+			]
 		];
 		
-		$reply_markup = $telegram->replyKeyboardMarkup([
-			'keyboard'			=> $keyboard, 
-			'resize_keyboard'	=> true, 
-			'one_time_keyboard'	=> true
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
 		]);
 		
-		$telegram->sendMessage([
-			'chat_id'		=> $chat_id, 
-			'text'			=> $answer,
-			'reply_markup'	=> $reply_markup
-		]);
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> $answer,
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
 	}
 	
 	// name
