@@ -38,7 +38,7 @@ class ProductsController extends MyAdminController {
         
         $grid->column('id'				, __('ID'));
         
-        $grid->column('sort'			, __('admin.products.sort'));
+        //$grid->column('sort'			, __('admin.products.sort'));
         
         $grid->column('public'			, __('admin.public'))->display(function($public){
 			$public = (int)$public;
