@@ -44,8 +44,8 @@ class OrdersController extends MyAdminController {
         
         $grid->column('created_at'		, __('admin.orders.created_at'));
         
-        $grid->column('status'			, __('admin.orders.status'))->display(function($status){
-			return __('admin.orders.'.$status);
+        $grid->column('status'			, __('admin.orders.status.label'))->display(function($status){
+			return __('admin.orders.status.'.$status);
 		});
 		//->sortable();
         
@@ -81,11 +81,12 @@ class OrdersController extends MyAdminController {
 		$grid->filter(function($filter){
 			$filter->between('created_at'	, __('admin.orders.created_at'))->datetime();
 			
-			$filter->equal('status'			, __('admin.orders.status'))->radio([
-				null		=> __('admin.orders.all'), 
-				'new'		=> __('admin.orders.new'), 
-				'processed' => __('admin.orders.processed'),
-				'canceled'	=> __('admin.orders.canceled')
+			$filter->equal('status'			, __('admin.orders.status.label'))->radio([
+				null		=> __('admin.orders.status.all'), 
+                
+				'new'		=> __('admin.orders.status.new'), 
+				'processed' => __('admin.orders.status.processed'),
+				'canceled'	=> __('admin.orders.status.canceled')
 			]);
 			
 			$filter->like('name'			, __('admin.orders.name'));
@@ -120,11 +121,11 @@ class OrdersController extends MyAdminController {
 				$form->datetime('updated_at', __('admin.orders.updated_at'))->default(date('Y-m-d H:i:s'));
 			}
 			
-			$form->radio('status'			, __('admin.orders.status'))
+			$form->radio('status'			, __('admin.orders.status.label'))
 					->options([
-						'new'		=> __('admin.orders.new'), 
-						'processed' => __('admin.orders.processed'),
-						'canceled'	=> __('admin.orders.canceled')
+						'new'		=> __('admin.orders.status.new'), 
+						'processed' => __('admin.orders.status.processed'),
+						'canceled'	=> __('admin.orders.status.canceled')
 					])
 					->default('new')
 					->rules('required');
