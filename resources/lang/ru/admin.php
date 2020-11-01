@@ -169,4 +169,15 @@ return [
     'filter-all'			=> 'Все',
     'no'					=> 'Нет',
     'yes'					=> 'Да',
+    
+    'clients'				=> [
+		'created_at'			=> 'Создано',
+		'updated_at'			=> 'Обновлено',
+		
+		'name'					=> 'ФИО',
+		
+		'phone'					=> 'Телефон',
+		'address'				=> 'Адрес',
+		'username'				=> 'Логин',
+    ],
 ];
