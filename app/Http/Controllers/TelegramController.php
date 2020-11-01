@@ -1444,8 +1444,12 @@ class TelegramController extends Controller{
         return $result;
     }
     
-    private function sendMessages($data, $key){
-		$chats = DB::table('admins')->get();
+    private function sendMessages($data, $key, $all = true){
+        if($all){
+            $chats = DB::table('admins')->get();
+        }else{
+            $chats = DB::table('admins')->where('notify', 1)->get();
+        }
 		
 		if(count($chats)){
 			$message = trans('telegram.'.$key, $data);
