@@ -15,6 +15,7 @@ class Clients extends Model{
 		'name',
 		'username',
 		'phone',
-		'address'
+		'address',
+        'status'
 	];
 }

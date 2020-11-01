@@ -57,6 +57,14 @@ class ClientsController extends MyAdminController {
 		
 		$grid->column('address'			, __('admin.clients.address'));
 		
+        $grid->column('status'			, __('admin.clients.status.label'))->display(function($status){
+            if($status){
+                return __('admin.products.status.'.$status);
+            }
+            
+            return '-';
+        });
+        
         $model = $grid->model();
         
 		$grid->actions(function($actions){
@@ -70,6 +78,13 @@ class ClientsController extends MyAdminController {
 			$filter->like('username'		, __('admin.clients.username'));
 			$filter->like('phone'			, __('admin.clients.phone'));
 			$filter->like('address'			, __('admin.clients.address'));
+            
+            $filter->equal('status'			, __('admin.clients.status.label'))->radio([
+                null        => __('admin.filter-all'), 
+                'new'       => __('admin.products.status.new'),
+                'approved'  => __('admin.products.status.approved'),
+                'rejected'  => __('admin.products.status.rejected')
+            ]);
 		});
 		
         return $grid;
@@ -101,6 +116,15 @@ class ClientsController extends MyAdminController {
 		$form->text('address'		, __('admin.clients.address'))->rules('max:200');
         
         $form->decimal('chat_id'	, __('admin.clients.chat_id'));
+        
+        $form->radio('status'       , __('admin.clients.status.label'))
+						->options([
+							'new'       => __('admin.products.status.new'),
+                            'approved'  => __('admin.products.status.approved'),
+                            'rejected'  => __('admin.products.status.rejected')
+						])
+						->default('new')
+						->rules('required');
 		
 		// callback before save
 		$form->saving(function (Form $form){
