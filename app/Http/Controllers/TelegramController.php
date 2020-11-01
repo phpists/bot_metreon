@@ -105,7 +105,7 @@ class TelegramController extends Controller{
                         'text'			=> __('telegram.access_is_denied')
                     ]);
                     
-                    return false;
+                    return response()->json([], 200);
                 }
                 
                 if($client->status == 'new'){
@@ -114,7 +114,7 @@ class TelegramController extends Controller{
                         'text'			=> __('telegram.request_being_processed')
                     ]);
                     
-                    return false;
+                    return response()->json([], 200);
                 }
                 
                 if($client->status == 'rejected'){
@@ -123,7 +123,7 @@ class TelegramController extends Controller{
                         'text'			=> __('telegram.request_rejected')
                     ]);
                     
-                    return false;
+                    return response()->json([], 200);
                 }
                 
                 if($text == "Кошик"){
