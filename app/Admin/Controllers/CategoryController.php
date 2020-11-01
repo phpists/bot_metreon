@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Category;
+use App\Models\SubCategory;
 
 use App\Admin\Controllers\MyAdminController;
 
@@ -94,14 +95,16 @@ class CategoryController extends MyAdminController {
 			
 			$form->decimal('sort'		, __('admin.category.sort'));
 			$form->text('name'			, __('admin.category.name'))->rules('required|min:3|max:100');
-			
-			//$form->display('created_at', 'Created At');
-			//$form->display('updated_at', 'Updated At');
 		});
 		
-		if($this->_edit){
-			if(!$this->_update){}
-		}
+		$form->tab(__('admin.subcategory.label')	, function($form) use ($id){
+			$form->hasMany('subcategory', function($form){
+				$form->switch('public'		, __('admin.public'));
+				
+				$form->decimal('sort'		, __('admin.subcategory.sort'));
+				$form->text('name'			, __('admin.subcategory.name'))->rules('required|min:3|max:100');
+			});
+		});
 		
 		// callback before save
 		$form->saving(function (Form $form){
