@@ -43,4 +43,5 @@ return [
     'access_is_denied'              => 'Доступ запрещен',
     
     'select_category'               => "Выберите категорию ⤵️",
+    'select_subcategory'            => "Выберите подкатегорию ⤵️",
 ];

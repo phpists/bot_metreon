@@ -15,6 +15,7 @@ use TelegramBot\Api\BotApi;
 
 use App\Models\Contents;
 use App\Models\Category;
+use App\Models\SubCategory;
 use App\Models\Products;
 use App\Models\Messages;
 
@@ -242,6 +243,10 @@ class TelegramController extends Controller{
                     
 					if($command == 'rejected'){
                         $this->commandRejected($telegram, $result, $chat_id, $id);
+                    }
+                    
+                    if($command == 'cat'){
+                        $this->commandSubcategoryList($telegram, $result, $chat_id, $id);
                     }
                     
 					if($command == 'data'){
@@ -869,6 +874,48 @@ class TelegramController extends Controller{
 			[
 				'chat_id'		=> $chat_id, 
 				'text'			=> __('telegram.select_category'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+    
+    function commandSubcategoryList(&$telegram, $result, $chat_id, $id){
+        $items = [];
+		
+		$cat = SubCategory::query()->where('subcategory.public', '1')
+								->orderBy('subcategory.sort', 'asc')
+								->select(
+									DB::raw('subcategory.*'), 
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`sub_id` = `subcategory`.`id` AND `products`.`public` = 1) as `count_products`')
+								)
+								->get();
+		
+		if(count($cat)){
+			foreach($cat as $item){
+				$item->count_products = (int)$item->count_products;
+				
+				if(!$item->count_products){
+					continue;
+				}
+				
+				$items[] = [
+					[
+						"text"								=> $item->name,
+						"switch_inline_query_current_chat"	=> 'sub-'.$item->id
+					]
+				];
+			}
+		}
+        
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> __('telegram.select_subcategory'),
 				'parse_mode'	=> 'Markdown',
 				'reply_markup'	=> $inline_keyboard
 			]
