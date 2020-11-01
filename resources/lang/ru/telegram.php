@@ -40,5 +40,7 @@ return [
     
     'request_being_processed'       => 'Ваша заявка на обработке',
     
-    'access_is_denied'              => 'Доступ запрещен'
+    'access_is_denied'              => 'Доступ запрещен',
+    
+    'select_category'               => "Выберите категорию ⤵️",
 ];

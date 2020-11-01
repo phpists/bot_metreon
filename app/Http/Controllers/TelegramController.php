@@ -93,7 +93,11 @@ class TelegramController extends Controller{
 			if($text == '/start'){
                 Messages::query()->where('chat_id', $chat_id)->delete();
                 
-				$this->commandStart($telegram, $chat_id);
+                if($client && $client->status == 'approved'){
+                    $this->commandCategoryList($telegram, $chat_id);
+                }else{
+                    $this->commandStart($telegram, $chat_id);
+                }
 			}elseif($text == '/subscribe'){
                 $this->commandSubscribe($telegram, $chat_id);
             }elseif($text == '/cancel'){
@@ -594,102 +598,8 @@ class TelegramController extends Controller{
         ]);
     }
     
-    function commandMenu(&$telegram, $chat_id, $hide_keyboard = true, $mini = false){
-		if($hide_keyboard){
-			$reply_markup = $telegram->replyKeyboardHide([
-				'hide_keyboard' => true,
-				'selective'     => false,
-			]);
-		}
-		
-		//
-		
-		$answer = "";
-		
-		$tmp = Contents::query()->where('key', 'menu-text')->where('public', '1')->first();
-		
-		if($tmp){
-			$answer = trim($tmp->text);
-		}
-		
-		if($hide_keyboard){
-			$telegram->sendMessage([
-				'chat_id'		=> $chat_id, 
-				'text'			=> $answer,
-				'reply_markup'	=> $reply_markup
-			]);
-		}else{
-			$telegram->sendMessage([
-				'chat_id'		=> $chat_id, 
-				'text'			=> $answer
-			]);
-		}
-		
-		//
-		
-		$items = [];
-		
-		$cat = Category::query()->where('category.public', '1')
-								->orderBy('category.sort', 'asc')
-								->select(
-									DB::raw('category.*'), 
-									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
-								)
-								->get();
-		
-		if(count($cat)){
-			foreach($cat as $item){
-				$item->count_products = (int)$item->count_products;
-				
-				if(!$item->count_products){
-					continue;
-				}
-				
-				$items[] = [
-					[
-						"text"								=> $item->name,
-						"switch_inline_query_current_chat"	=> 'cat-'.$item->id
-					]
-				];
-			}
-		}
-		
-		if($mini){
-			$items[] = [
-				[
-					"text"								=> "↩️ Головне меню",
-					"callback_data"						=> "start"
-				]
-			];
-		}else{
-			$items[] = [
-				[
-					"text"								=> "↩️ Головна",
-					"callback_data"						=> "start"
-				],
-				[
-					"text"								=> "🛒 Корзина",
-					"callback_data"						=> "cart"
-				]
-			];
-		}
-		
-		$answer = "Оберіть потрібне ⤵️";
-		
-		$inline_keyboard = json_encode([
-			'inline_keyboard'	=> $items
-		]);
-		
-		$this->sendMessage(
-			[
-				'chat_id'		=> $chat_id, 
-				'text'			=> $answer,
-				'parse_mode'	=> 'Markdown',
-				'reply_markup'	=> $inline_keyboard
-			]
-		);
-	}
-	
+    //
+    
 	function commandCart(&$telegram, $chat_id){
 		\Cart::session($chat_id);
 		
@@ -921,6 +831,50 @@ class TelegramController extends Controller{
 		);
 	}
 	
+    //
+    
+    function commandCategoryList(&$telegram, $chat_id){
+        $items = [];
+		
+		$cat = Category::query()->where('category.public', '1')
+								->orderBy('category.sort', 'asc')
+								->select(
+									DB::raw('category.*'), 
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
+								)
+								->get();
+		
+		if(count($cat)){
+			foreach($cat as $item){
+				$item->count_products = (int)$item->count_products;
+				
+				if(!$item->count_products){
+					continue;
+				}
+				
+				$items[] = [
+					[
+						"text"								=> $item->name,
+						"switch_inline_query_current_chat"	=> 'cat-'.$item->id
+					]
+				];
+			}
+		}
+        
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> __('telegram.select_category'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+    
 	//
 	
 	// кількість
