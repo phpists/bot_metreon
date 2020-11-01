@@ -26,5 +26,19 @@ return [
     'actions'				    => [
         'approved'  => 'Одобрить',
         'rejected'  => 'Отказать'
-    ]
+    ],
+    
+    'request_approved'              => 'Вашу заявку одобрено',
+    'request_rejected'              => 'В вашей заявке отказано',
+    
+    'request_alredy_approved'       => 'Заявка уже одобрена',
+    'request_alredy_rejected'       => 'В заявке уже отказано',
+    
+    'request_not_found'             => 'Заявка не найдена',
+    
+    'request_processed'             => 'Заявка обработана',
+    
+    'request_being_processed'       => 'Ваша заявка на обработке',
+    
+    'access_is_denied'              => 'Доступ запрещен'
 ];

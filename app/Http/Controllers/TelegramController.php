@@ -99,6 +99,33 @@ class TelegramController extends Controller{
             }elseif($text == '/cancel'){
                 $this->commandCancel($telegram, $chat_id);
             }else{
+                if(!$client){
+                    $telegram->sendMessage([
+                        'chat_id'		=> $chat_id, 
+                        'text'			=> __('telegram.access_is_denied')
+                    ]);
+                    
+                    return false;
+                }
+                
+                if($client->status == 'new'){
+                    $telegram->sendMessage([
+                        'chat_id'		=> $chat_id, 
+                        'text'			=> __('telegram.request_being_processed')
+                    ]);
+                    
+                    return false;
+                }
+                
+                if($client->status == 'rejected'){
+                    $telegram->sendMessage([
+                        'chat_id'		=> $chat_id, 
+                        'text'			=> __('telegram.request_rejected')
+                    ]);
+                    
+                    return false;
+                }
+                
                 if($text == "Кошик"){
                     $this->commandCart($telegram, $chat_id);
                 }
@@ -204,7 +231,15 @@ class TelegramController extends Controller{
 							]);
 						}
 					}
-					
+                    
+                    if($command == 'approved'){
+                        $this->commandApproved($telegram, $result, $chat_id, $id);
+                    }
+                    
+					if($command == 'rejected'){
+                        $this->commandRejected($telegram, $result, $chat_id, $id);
+                    }
+                    
 					if($command == 'data'){
 						$hash = explode("&", $hash);
 						
@@ -465,6 +500,98 @@ class TelegramController extends Controller{
 				);
 			}
 		}
+    }
+    
+    function commandApproved(&$telegram, $result, $chat_id, $client_id){
+        $client     = Clients::query()->where('id', $client_id)->first();
+        
+        if(!$client){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_not_found')
+            ]);
+            
+            return false;
+        }
+        
+        if($client->status == 'approved'){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_alredy_approved')
+            ]);
+            
+            return false;
+        }
+        
+        if($client->status == 'rejected'){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_alredy_rejected')
+            ]);
+            
+            return false;
+        }
+        
+        $client->status = 'approved';
+        $client->save();
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $chat_id, 
+            'text'			=> __('telegram.request_processed')
+        ]);
+        
+        //
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $client->chat_id, 
+            'text'			=> __('telegram.request_approved')
+        ]);
+    }
+    
+    function commandRejected(&$telegram, $result, $chat_id, $client_id){
+        $client     = Clients::query()->where('id', $client_id)->first();
+        
+        if(!$client){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_not_found')
+            ]);
+            
+            return false;
+        }
+        
+        if($client->status == 'approved'){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_alredy_approved')
+            ]);
+            
+            return false;
+        }
+        
+        if($client->status == 'rejected'){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.request_alredy_rejected')
+            ]);
+            
+            return false;
+        }
+        
+        $client->status = 'rejected';
+        $client->save();
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $chat_id, 
+            'text'			=> __('telegram.request_processed')
+        ]);
+        
+        //
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $client->chat_id, 
+            'text'			=> __('telegram.request_rejected')
+        ]);
     }
     
     function commandMenu(&$telegram, $chat_id, $hide_keyboard = true, $mini = false){
