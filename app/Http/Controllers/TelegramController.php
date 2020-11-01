@@ -49,6 +49,8 @@ class TelegramController extends Controller{
         $chat_id	= isset($result["message"]["chat"]["id"]) ? $result["message"]["chat"]["id"] : 0;
         $username	= isset($result["message"]["from"]["username"]) ? $result["message"]["from"]["username"] : "";
         
+        $client     = Clients::query()->where('chat_id', $chat_id)->first();
+        
         //Клавиатура
         $keyboard	= [
 			[]
@@ -67,125 +69,60 @@ class TelegramController extends Controller{
                         $this->codeVerification($result, $text, $chat_id, $username);
                         $message = null;
                     }
+                    
+                    if($message->type == "request"){
+                        $this->commandRequest($telegram, $result, $text, $chat_id, $client, $username);
+                        
+                        $message    = null;
+                        $text       = null;
+                    }
                 }
 			}
 		}
 		
 		if($text){
 			if($text == '/start'){
-				$reply_markup = $telegram->replyKeyboardMarkup([
-					'keyboard'			=> $keyboard, 
-					'resize_keyboard'	=> true, 
-					'one_time_keyboard'	=> false
-				]);
-				
-				//
-				
-				$answer = "";
-				
-				$tmp = Contents::query()->where('key', 'introductory-message')->where('public', '1')->first();
-				
-				if($tmp){
-					$answer = trim($tmp->text);
-				}
-				
-				$telegram->sendMessage([
-					'chat_id'		=> $chat_id, 
-					'text'			=> $answer,
-					'reply_markup'	=> $reply_markup
-				]);
-				
-				Messages::query()->where('chat_id', $chat_id)->delete();
-			}
-            
-            if($text == '/subscribe'){
-                $id = md5(time().'-'.$chat_id.'-code');
-                
-                Messages::create([
-                    "id"			=> $id,
-                    "product_id"	=> 0,
-                    "message_id"	=> 0,
-                    "chat_id"		=> $chat_id,
-                    "date"			=> "",
-                    "type"			=> "code"
-                ]);
-                
-                $this->sendMessage(
-                    [
-                        'chat_id'		=> $chat_id,
-                        'text'			=> trans('telegram.invitation'),
-                        'parse_mode'	=> 'Markdown',
-                    ],
-                    "sendMessage", 
-                    true, 
-                    true
-                );
-            }
-            
-            if($text == '/cancel'){
                 Messages::query()->where('chat_id', $chat_id)->delete();
                 
-                $admin = Admins::query()->where('chat_id', $chat_id)->first();
+				$this->commandStart($telegram, $chat_id);
+			}elseif($text == '/subscribe'){
+                $this->commandSubscribe($telegram, $chat_id);
+            }elseif($text == '/cancel'){
+                $this->commandCancel($telegram, $chat_id);
+            }else{
+                if($text == "Кошик"){
+                    $this->commandCart($telegram, $chat_id);
+                }
                 
-                if(!$admin){
-                    $this->sendMessage(
-                        [
-                            'chat_id'		=> $chat_id,
-                            'text'			=> trans('telegram.not_subscribed'),
-                            'parse_mode'	=> 'Markdown',
-                        ],
-                        "sendMessage", 
-                        true, 
-                        true
-                    );
-                }else{
-                    Admins::query()->where('id', $admin->id)->delete();
+                if($text == "Оформити"){
+                    $this->commandOrder($telegram, $chat_id, $result);
+                }
+                
+                if($text == "Очистити"){
+                    \Cart::session($chat_id);
+                    \Cart::clear();
                     
-                    $this->sendMessage(
-                        [
-                            'chat_id'		=> $chat_id,
-                            'text'			=> trans('telegram.successfully_unsubscribed'),
-                            'parse_mode'	=> 'Markdown',
-                        ],
-                        "sendMessage", 
-                        true, 
-                        true
-                    );
+                    $answer = "🛒 Кошик очищено\nПовертаємось у Головне меню ↩️";
+                    
+                    $keyboard	= [
+                        []
+                    ];
+                    
+                    $reply_markup = $telegram->replyKeyboardMarkup([
+                        'keyboard'			=> $keyboard, 
+                        'resize_keyboard'	=> true, 
+                        'one_time_keyboard'	=> true
+                    ]);
+                    
+                    $telegram->sendMessage([
+                        'chat_id'		=> $chat_id, 
+                        'text'			=> $answer,
+                        'reply_markup'	=> $reply_markup
+                    ]);
+                    
+                    return;
                 }
             }
-			
-			if($text == "Кошик"){
-				$this->commandCart($telegram, $chat_id);
-			}
-			
-			if($text == "Оформити"){
-				$this->commandOrder($telegram, $chat_id, $result);
-			}
-			
-			if($text == "Очистити"){
-				\Cart::session($chat_id);
-				\Cart::clear();
-				
-				$answer = "🛒 Кошик очищено\nПовертаємось у Головне меню ↩️";
-				
-				$keyboard	= [
-					[]
-				];
-				
-				$reply_markup = $telegram->replyKeyboardMarkup([
-					'keyboard'			=> $keyboard, 
-					'resize_keyboard'	=> true, 
-					'one_time_keyboard'	=> true
-				]);
-				
-				$telegram->sendMessage([
-					'chat_id'		=> $chat_id, 
-					'text'			=> $answer,
-					'reply_markup'	=> $reply_markup
-				]);
-				
-				return;
-			}
 		}
 		
 		if(isset($result["callback_query"])){
@@ -478,6 +415,87 @@ class TelegramController extends Controller{
 		}
 		
         return response()->json([], 200);
+    }
+    
+    function commandStart(&$telegram, $chat_id){
+        $reply_markup = $telegram->replyKeyboardMarkup([
+            'keyboard'			=> $keyboard, 
+            'resize_keyboard'	=> true, 
+            'one_time_keyboard'	=> false
+        ]);
+        
+        //
+        
+        $answer = "";
+        
+        $tmp = Contents::query()->where('key', 'introductory-message')->where('public', '1')->first();
+        
+        if($tmp){
+            $answer = trim($tmp->text);
+        }
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $chat_id, 
+            'text'			=> $answer,
+            'reply_markup'	=> $reply_markup
+        ]);
+        
+        //
+        
+        $id = md5(time().'-'.$chat_id.'-code');
+        
+        Messages::create([
+            "id"			=> $id,
+            "product_id"	=> 0,
+            "message_id"	=> 0,
+            "chat_id"		=> $chat_id,
+            "date"			=> "",
+            "type"			=> "request"
+        ]);
+    }
+    
+    function commandRequest(&$telegram, $result, $text, $chat_id, $client, $username){
+        $text = preg_replace('/[^a-zA-Zа-яА-ЯіІёЁъЪєЄїЇ0-9\:\-\(\)\.\, ]/ui', '', $text);
+		$text = trim($text);
+        
+        if(!$text){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.text_required')
+            ]);
+            
+            return false;
+        }
+        
+        $len = mb_strlen($text);
+        
+        if($len > 1000){
+            $telegram->sendMessage([
+                'chat_id'		=> $chat_id, 
+                'text'			=> __('telegram.text_max', ['max' => 1000])
+            ]);
+            
+            return false;
+        }
+        
+        if(!$client){
+            $client = Clients::create([
+                'chat_id'   => $chat_id,
+                'username'  => $username,
+                'note'      => $text
+            ]);
+        }else{
+            $client->note       = $text;
+            $client->username   = $username;
+            $client->save();
+        }
+        
+        Messages::query()->where('chat_id', $chat_id)->delete();
+        
+        $telegram->sendMessage([
+            'chat_id'		=> $chat_id, 
+            'text'			=> __('telegram.request_send')
+        ]);
     }
     
     function commandMenu(&$telegram, $chat_id, $hide_keyboard = true, $mini = false){
@@ -1371,6 +1389,62 @@ class TelegramController extends Controller{
 	}
     
     //
+    
+    function commandSubscribe(&$telegram, $chat_id){
+        $id = md5(time().'-'.$chat_id.'-code');
+        
+        Messages::create([
+            "id"			=> $id,
+            "product_id"	=> 0,
+            "message_id"	=> 0,
+            "chat_id"		=> $chat_id,
+            "date"			=> "",
+            "type"			=> "code"
+        ]);
+        
+        $this->sendMessage(
+            [
+                'chat_id'		=> $chat_id,
+                'text'			=> trans('telegram.invitation'),
+                'parse_mode'	=> 'Markdown',
+            ],
+            "sendMessage", 
+            true, 
+            true
+        );
+    }
+    
+    function commandCancel(&$telegram, $chat_id){
+        Messages::query()->where('chat_id', $chat_id)->delete();
+        
+        $admin = Admins::query()->where('chat_id', $chat_id)->first();
+        
+        if(!$admin){
+            $this->sendMessage(
+                [
+                    'chat_id'		=> $chat_id,
+                    'text'			=> trans('telegram.not_subscribed'),
+                    'parse_mode'	=> 'Markdown',
+                ],
+                "sendMessage", 
+                true, 
+                true
+            );
+        }else{
+            Admins::query()->where('id', $admin->id)->delete();
+            
+            $this->sendMessage(
+                [
+                    'chat_id'		=> $chat_id,
+                    'text'			=> trans('telegram.successfully_unsubscribed'),
+                    'parse_mode'	=> 'Markdown',
+                ],
+                "sendMessage", 
+                true, 
+                true
+            );
+        }
+    }
     
     public function codeVerification($data, $text, $chat_id, $username){
         $code = env('TELEGRAM_CODE', '');

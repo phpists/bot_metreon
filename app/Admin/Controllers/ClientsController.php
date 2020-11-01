@@ -126,6 +126,8 @@ class ClientsController extends MyAdminController {
 						->default('new')
 						->rules('required');
 		
+        $form->text('note'		    , __('admin.clients.note'));
+        
 		// callback before save
 		$form->saving(function (Form $form){
 			$form->name			= trim($form->name);
