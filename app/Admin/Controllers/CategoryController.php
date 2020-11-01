@@ -88,7 +88,7 @@ class CategoryController extends MyAdminController {
         
         $form->tab(__('admin.category.info')		, function($form) use ($id){
 			if($id){
-				$form->datetime('updated_at', __('admin.Category.updated_at'))->default(date('Y-m-d H:i:s'));
+				$form->datetime('updated_at', __('admin.category.updated_at'))->default(date('Y-m-d H:i:s'));
 			}
 			
 			$form->switch('public'		, __('admin.public'));
