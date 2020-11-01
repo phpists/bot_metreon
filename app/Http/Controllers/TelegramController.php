@@ -496,6 +496,16 @@ class TelegramController extends Controller{
             'chat_id'		=> $chat_id, 
             'text'			=> __('telegram.request_send')
         ]);
+        
+        $this->sendMessages(
+            [
+                'id'        => $client->id,
+                'username'  => $username,
+                'note'      => $text
+            ], 
+            'new_request', 
+            false
+        );
     }
     
     function commandMenu(&$telegram, $chat_id, $hide_keyboard = true, $mini = false){

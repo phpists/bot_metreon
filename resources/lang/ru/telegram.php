@@ -20,4 +20,6 @@ return [
     'text_max'                  => 'Максимальная длина :max символов',
     
     'request_send'              => 'Ваша заявка отправлена на обработку',
+    
+    'new_request'			    => "Новая заявка!\n\nID: :id\nКонтакт: :username\n\n:note",
 ];
