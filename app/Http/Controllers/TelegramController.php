@@ -104,7 +104,7 @@ class TelegramController extends Controller{
                 Messages::create([
                     "id"			=> $id,
                     "product_id"	=> 0,
-                    "message_id"	=> $result['message']['id'],
+                    "message_id"	=> 0,
                     "chat_id"		=> $chat_id,
                     "date"			=> "",
                     "type"			=> "code"
