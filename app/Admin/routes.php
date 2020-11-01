@@ -16,4 +16,5 @@ Route::group([
     $router->resource('products'			, ProductsController::class);
     $router->resource('clients'				, ClientsController::class);
     $router->resource('admins'				, AdminsController::class);
+    $router->resource('contents'			, ContentsController::class);
 });
