@@ -10,19 +10,16 @@ class Orders extends Model{
 	
     protected $table	= 'orders';
     
-    public $timestamps	= true;
+    public $timestamps	= false;
     
     protected $fillable = [
+        'created_at',
+        'updated_at',
 		'status',
 		'name',
 		'phone',
 		'amount',
-		'address',
-		'delivery',
-		'note',
-		'chat_id',
-		'paid',
-		'payment'
+		'chat_id'
 	];
 	
 	public function products(){
