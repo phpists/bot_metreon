@@ -306,86 +306,85 @@ class TelegramController extends Controller{
 			$command	= $result["inline_query"]["query"];
             $command	= explode('-', $command);
                 
-                if(isset($command[1])){
-                    $id			= (int)$command[1];
-                    $command	= $command[0];
+            if(isset($command[1])){
+                $id			= (int)$command[1];
+                $command	= $command[0];
+                
+                if($id > 0 && $command == 'sub'){
+                    $tmp = Products::query()->where('public', '1')->where('sub_id', $id)->get();
                     
-                    if($id > 0 && $command == 'sub'){
-                        $tmp = Products::query()->where('public', '1')->where('sub_id', $id)->get();
-                        
-                        if(count($tmp)){
-                            foreach($tmp as $item){
-                                $image = '';
-                                $thumb = '';
+                    if(count($tmp)){
+                        foreach($tmp as $item){
+                            $image = '';
+                            $thumb = '';
+                            
+                            if($item->image){
+                                $image	= 'storage/'.$item->image;
                                 
-                                if($item->image){
-                                    $image	= 'storage/'.$item->image;
+                                if(!file_exists(ROOT.'/../storage/app/admin/'.$item->image)){
+                                    $image = '';
+                                }else{
+                                    $thumb = ImageHelper::thumb('storage/'.$item->image, 60, 60, 'pad');
                                     
-                                    if(!file_exists(ROOT.'/../storage/app/admin/'.$item->image)){
-                                        $image = '';
-                                    }else{
-                                        $thumb = ImageHelper::thumb('storage/'.$item->image, 60, 60, 'pad');
-                                        
-                                        if(!$thumb){
-                                            $thumb = $image;
-                                        }
+                                    if(!$thumb){
+                                        $thumb = $image;
                                     }
                                 }
-                                
-                                $columns = [];
-                                
-                                $columns[] = "👉 ".$item->name;
-                                
-                                if($image){
-                                    $columns[0] = "<a href='".url($image)."'>".$columns[0]."</a>";
-                                }
-                                
-                                $columns[] = "\n".__('telegram.select_count');
-                                
-                                $keyboard = [
-                                    [
-                                        [
-                                            "text"			=> 1,
-                                            "callback_data"	=> 'data-'.$item->id.'#type=count&count=1'
-                                        ],
-                                        [
-                                            "text"			=> 2,
-                                            "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
-                                        ]
-                                    ],
-                                    [
-                                        [
-                                            "text"		    => __('telegram.back'),
-                                            "callback_data" => 'cat-'.$item->cat_id
-                                        ]
-                                    ]
-                                ];
-                                
-                                $inline_keyboard = [
-                                    'inline_keyboard'	=> $items
-                                ];
-                                
-                                $answer['results'][] = [
-                                    'type'  				=> 'article',
-                                    'id'  					=> (string)$item->id,
-                                    
-                                    'title'  				=> $item->name,
-                                    'description'			=>  "💳 ".$item->price.__('telegram.rub'),
-                                    
-                                    'input_message_content'	=> [
-                                        'message_text'				=> implode("\n", $columns),
-                                        'parse_mode'				=> 'HTML'
-                                    ],
-                                    
-                                    'thumb_url'  			=> $thumb ? url($thumb) : '',
-                                    
-                                    'reply_markup'			=> $inline_keyboard
-                                ];
                             }
+                            
+                            $columns = [];
+                            
+                            $columns[] = "👉 ".$item->name;
+                            
+                            if($image){
+                                $columns[0] = "<a href='".url($image)."'>".$columns[0]."</a>";
+                            }
+                            
+                            $columns[] = "\n".__('telegram.select_count');
+                            
+                            $keyboard = [
+                                [
+                                    [
+                                        "text"			=> 1,
+                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=1'
+                                    ],
+                                    [
+                                        "text"			=> 2,
+                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
+                                    ]
+                                ],
+                                [
+                                    [
+                                        "text"		    => __('telegram.back'),
+                                        "callback_data" => 'cat-'.$item->cat_id
+                                    ]
+                                ]
+                            ];
+                            
+                            $inline_keyboard = [
+                                'inline_keyboard'	=> $items
+                            ];
+                            
+                            $answer['results'][] = [
+                                'type'  				=> 'article',
+                                'id'  					=> (string)$item->id,
+                                
+                                'title'  				=> $item->name,
+                                'description'			=>  "💳 ".$item->price."".__('telegram.rub'),
+                                
+                                'input_message_content'	=> [
+                                    'message_text'				=> implode("\n", $columns),
+                                    'parse_mode'				=> 'HTML'
+                                ],
+                                
+                                'thumb_url'  			=> $thumb ? url($thumb) : '',
+                                
+                                'reply_markup'			=> $inline_keyboard
+                            ];
                         }
                     }
                 }
-			}
+            }
 			
 			$answer['results'] = json_encode($answer['results']);
 			
