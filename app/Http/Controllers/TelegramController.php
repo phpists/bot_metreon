@@ -104,7 +104,7 @@ class TelegramController extends Controller{
                 Messages::create([
                     "id"			=> $id,
                     "product_id"	=> 0,
-                    "message_id"	=> $message['result']['message_id'],
+                    "message_id"	=> $result['message']['id'],
                     "chat_id"		=> $chat_id,
                     "date"			=> "",
                     "type"			=> "code"
@@ -1277,7 +1277,7 @@ class TelegramController extends Controller{
 		return true;
 	}
 	
-	// note
+	//
 	
 	function startConfirm(&$telegram, $chat_id, $text, $result, $order_id){
 		$answer = "";
@@ -1372,29 +1372,7 @@ class TelegramController extends Controller{
     
     //
     
-    private function sendMessage($send, $method = "sendMessage", $post = true, $json = true){
-		$key = env('TELEGRAM_TOKEN', '');
-		
-		if(!$key){
-			return false;
-		}
-		
-        $url = "https://api.telegram.org/bot".$key."/".$method;
-        
-        CurlHelper::setUrl($url);
-		CurlHelper::setTimeout(10);
-		CurlHelper::post($post);
-		CurlHelper::setData($send, false);
-		CurlHelper::json($json);
-				
-		$result = CurlHelper::request(false);
-        
-        return $result;
-    }
-    
-	// info
-	
-	public function codeVerification($data, $text, $chat_id, $username){
+    public function codeVerification($data, $text, $chat_id, $username){
         $code = env('TELEGRAM_CODE', '');
         
         if($code && $text == $code){
@@ -1442,6 +1420,28 @@ class TelegramController extends Controller{
                 true
             );
         }
+    }
+    
+    //
+    
+    private function sendMessage($send, $method = "sendMessage", $post = true, $json = true){
+		$key = env('TELEGRAM_TOKEN', '');
+		
+		if(!$key){
+			return false;
+		}
+		
+        $url = "https://api.telegram.org/bot".$key."/".$method;
+        
+        CurlHelper::setUrl($url);
+		CurlHelper::setTimeout(10);
+		CurlHelper::post($post);
+		CurlHelper::setData($send, false);
+		CurlHelper::json($json);
+				
+		$result = CurlHelper::request(false);
+        
+        return $result;
     }
     
     private function sendMessages($data, $key){
