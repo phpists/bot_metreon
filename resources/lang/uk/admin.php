@@ -140,6 +140,8 @@ return [
     
     'noindex'				=> 'Не індексувати',
     
+    'public'				=> 'Опубліковано',
+    
     'category'				=> [
 		'created_at'			=> 'Створено',
 		'updated_at'			=> 'Оновлено',
