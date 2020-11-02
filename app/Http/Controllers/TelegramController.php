@@ -687,7 +687,7 @@ class TelegramController extends Controller{
 		\Cart::session($chat_id);
 		$cart = \Cart::getContent();
 		
-		if($cart){
+		if(count($cart)){
 			$keyboard = [];
 			
 			$keyboard[] = [
@@ -757,7 +757,7 @@ class TelegramController extends Controller{
         \Cart::session($chat_id);
 		$cart = \Cart::getContent();
 		
-		if($cart){
+		if(count($cart)){
 			$items[] = [
 				[
 					"text"				=> __('telegram.go_to_cart'),
