@@ -1271,6 +1271,8 @@ class TelegramController extends Controller{
         
         $sheet->getRowDimension('8')->setRowHeight(50);
         
+        $sheet->getRowDimension('10')->setRowHeight(25);
+        
         $sheet->getColumnDimension("B")->setAutoSize(true);
         $sheet->getColumnDimension("C")->setAutoSize(true);
         $sheet->getColumnDimension("D")->setAutoSize(true);
