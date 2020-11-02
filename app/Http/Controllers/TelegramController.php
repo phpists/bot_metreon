@@ -905,9 +905,47 @@ class TelegramController extends Controller{
 		
 		$cart = \Cart::getContent();
 		
-		$answer = __('telegram.cart_title');
-		
 		if(count($cart)){
+            $answer = __('telegram.cart_title');
+            
+            $telegram->sendMessage([
+				'chat_id'		=> $chat_id, 
+				'text'			=> $answer,
+				'parse_mode'	=> 'Markdown'
+			]);
+            
+            $amount = 0;
+			
+			foreach($cart as $item){
+				$amount += ($item->quantity * $item->price);
+				
+				$product = $item->name."\n️";
+				$product .= __('telegram.product_info', [
+					'count'		=> $item->quantity,
+					'price'		=> $item->price,
+					'amount'	=> $item->price * $item->quantity,
+				]);
+				//$product .= "\n\n";
+                
+                $keyboard	= [
+                    [
+                        [
+                            "text"			=> __('telegram.remove_btn'),
+                            "callback_data"	=> 'remove-'.$item->id
+                        ]
+                    ]
+                ];
+                
+                $telegram->sendMessage([
+                    'chat_id'		=> $chat_id, 
+                    'text'			=> $product,
+                    'parse_mode'	=> 'Markdown',
+                    'reply_markup'	=> $inline_keyboard
+                ]);
+			}
+            
+            //
+            
 			$keyboard	= [
 				[
 					[
@@ -933,38 +971,16 @@ class TelegramController extends Controller{
 			
 			//
 			
-			$amount = 0;
-			
-			$products = "";
-			
-			foreach($cart as $item){
-				$amount += ($item->quantity * $item->price);
-				
-				$products .= $item->name."\n️";
-				$products .= __('telegram.product_info', [
-					'count'		=> $item->quantity,
-					'price'		=> $item->price,
-					'amount'	=> $item->price * $item->quantity,
-				]);
-				$products .= "\n\n";
-			}
-			
-			$answer .= "\n";
-			$answer .= __('telegram.amount', ['amount' => $amount]);
+			$answer = __('telegram.amount', ['amount' => $amount]);
 			
 			$telegram->sendMessage([
 				'chat_id'		=> $chat_id, 
 				'text'			=> $answer,
-				'parse_mode'	=> 'Markdown'
-			]);
-			
-			$telegram->sendMessage([
-				'chat_id'		=> $chat_id, 
-				'text'			=> $products,
 				'parse_mode'	=> 'Markdown',
-				'reply_markup'	=> $inline_keyboard
+                'reply_markup'	=> $inline_keyboard
 			]);
 		}else{
+            $answer = __('telegram.cart_title');
 			$answer .= "\n";
 			$answer .= __('telegram.empty_cart');
 			
