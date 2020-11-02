@@ -833,7 +833,7 @@ class TelegramController extends Controller{
 			foreach($cart as $item){
 				$amount += ($item->quantity * $item->price);
 				
-				$products = $item->name."\n️";
+				$products .= $item->name."\n️";
 				$products .= __('telegram.product_info', [
 					'count'		=> $item->quantity,
 					'price'		=> $item->price,
