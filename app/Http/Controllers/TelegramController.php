@@ -1469,7 +1469,9 @@ class TelegramController extends Controller{
                 ]);
                 
                 return false;
-            }elseif($product->amount > $params['count']){
+            }
+            
+            if($params['count'] > 0 && $params['count'] > $product->amount){
                 $answer = __('telegram.max_count', ['count' => $product->amount]);
                 $answer .= "\n";
                 $answer .= __('telegram.enter_count');
