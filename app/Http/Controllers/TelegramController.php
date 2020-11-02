@@ -290,6 +290,14 @@ class TelegramController extends Controller{
 					return;
 				}
 				
+				if($command == 'order'){
+					$chat_id	= $result["callback_query"]["from"]["id"];
+					
+					$this->commandOrder($telegram, $chat_id, false);
+					
+					return;
+				}
+				
 				if($command == 'start'){
                     $chat_id	= $result["callback_query"]["from"]["id"];
                     
@@ -658,55 +666,74 @@ class TelegramController extends Controller{
 		
 		$cart = \Cart::getContent();
 		
-		$answer = "🛒 Кошик";
+		$answer = __('telegram.cart_title');
 		
 		if(count($cart)){
 			$keyboard	= [
 				[
-					["text" => "Оформити"],
-					["text" => "Очистити"]
+					[
+						"text"			=> __('telegram.order_btn'), 
+						"callback_data"	=> 'order'
+					],
+					[
+						"text"			=> __('telegram.clear_btn'), 
+						"callback_data"	=> 'clear'
+					]
 				],
 				[
-					["text" => "Головна"]
+					[
+						"text"			=> __('telegram.main'),
+						"callback_data"	=> 'start'
+					]
 				]
 			];
 			
-			$reply_markup = $telegram->replyKeyboardMarkup([
-				'keyboard'			=> $keyboard, 
-				'resize_keyboard'	=> true, 
-				'one_time_keyboard'	=> false
+			$inline_keyboard = json_encode([
+				'inline_keyboard'	=> $items
 			]);
 			
 			//
 			
 			$amount = 0;
 			
+			$products = "";
+			
 			foreach($cart as $item){
 				$amount += ($item->quantity * $item->price);
 				
-				$answer .= "\n\n";
-				$answer .= "#\n";
-				$answer .= "👉 ".$item->quantity." шт X ".$item->name."\n";
-				$answer .= "💰 Сума: ".($item->quantity * $item->price)." грн\n";
-				$answer .= "\n";
+				$products = $item->name."\n️";
+				$products .= __('telegram.product_info', [
+					'count'		=> $item->quantity,
+					'price'		=> $item->price,
+					'amount'	=> $item->price * $item->quantity,
+				]);
+				$products .= "\n\n";
 			}
 			
-			$answer .= "--\n";
-			$answer .= "💳 Всього: ".$amount." грн";
+			$answer .= "\n";
+			$answer .= __('telegram.amount', ['amount' => $amount]);
 			
 			$telegram->sendMessage([
 				'chat_id'		=> $chat_id, 
 				'text'			=> $answer,
-				'reply_markup'	=> $reply_markup
+				'parse_mode'	=> 'Markdown'
+			]);
+			
+			$telegram->sendMessage([
+				'chat_id'		=> $chat_id, 
+				'text'			=> $products,
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
 			]);
 		}else{
-			$answer .= "\nЩе порожньо, спершу оберіть товар";
+			$answer .= "\n";
+			$answer .= __('telegram.cart_title');
 			
 			$items = [];
 			
 			$items[] = [
 				[
-					"text"								=> "↩️ Головне меню",
+					"text"								=> "↩️ ".__('telegram.main'),
 					"callback_data"						=> "start"
 				]
 			];
