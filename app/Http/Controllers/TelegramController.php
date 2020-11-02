@@ -705,7 +705,7 @@ class TelegramController extends Controller{
 			];
 			
 			$inline_keyboard = json_encode([
-				'inline_keyboard'	=> $items
+				'inline_keyboard'	=> $keyboard
 			]);
 			
 			$this->sendMessage(
