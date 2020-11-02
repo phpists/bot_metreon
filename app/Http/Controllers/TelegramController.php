@@ -1248,7 +1248,7 @@ class TelegramController extends Controller{
 		$styleArray = array(
 			'font'		=> [
 				'bold'			=> true,
-                'size'          => 28
+                'size'          => 24
 			],
 			'alignment' => [
 				'horizontal'	=> \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -1258,7 +1258,7 @@ class TelegramController extends Controller{
         
 		$sheet->getStyle('B8')->applyFromArray($styleArray);
         
-        $styleArray['font']['size'] = 18;
+        $styleArray['font']['size'] = 16;
         
 		$sheet->getStyle('A10')->applyFromArray($styleArray);
 		$sheet->getStyle('B10')->applyFromArray($styleArray);
@@ -1272,7 +1272,7 @@ class TelegramController extends Controller{
         $sheet->getRowDimension('8')->setRowHeight(40);
         $sheet->getRowDimension('10')->setRowHeight(25);
         
-        $sheet->mergeCells('B8:D8');
+        $sheet->mergeCells('B8:E8');
         
         $sheet->getColumnDimension("B")->setAutoSize(true);
         $sheet->getColumnDimension("C")->setAutoSize(true);
