@@ -21,7 +21,11 @@ class Products extends Model{
 		'public',
 		'cat_id',
 		'sub_id',
-		'price'
+		'price',
+        'sort',
+        'amount',
+        'created_at',
+        'updated_at'
 	];
 	
 	public function category(){

@@ -46,6 +46,8 @@ class ProductsController extends MyAdminController {
 			return $public > 0 ? '<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>' : '<i class="fa fa-times" style="color:red;" aria-hidden="true"></i>';
 		});
         
+        $grid->column('amount'			, __('admin.products.amount'));
+        
         $grid->column('name'			, __('admin.products.name'));
         
         $grid->column('price'			, __('admin.products.price'))->display(function($price){
@@ -131,7 +133,8 @@ class ProductsController extends MyAdminController {
 			}
 			
 			$form->switch('public'		, __('admin.public'));
-			//$form->decimal('sort'		, __('admin.products.sort'));
+			
+            $form->decimal('amount'		, __('admin.products.amount'));
 			
 			$form->text('name'			, __('admin.products.name'))->rules('required|min:3|max:100');
 			
@@ -151,7 +154,7 @@ class ProductsController extends MyAdminController {
 				}
 			}
 			
-			$form->select('sub_id'		, __('admin.products.subcategory'))->options(($subcategory ? ([0 => ''] + $subcategory) : []));
+			$form->select('sub_id'		, __('admin.products.subcategory'))->options(($subcategory ? ([null => ''] + $subcategory) : []));
 			
 			$form->image('image'		, __('admin.products.image'))->removable();
 		});
@@ -160,7 +163,8 @@ class ProductsController extends MyAdminController {
 		$form->saving(function (Form $form){
 			$form->name			= trim($form->name);
 			$form->sort			= (int)trim($form->sort);
-			
+			$form->amount	    = (int)trim($form->amount);
+            
 			/*
 			if($form->sort < 1){
 				$count = DB::table('products')->count();
