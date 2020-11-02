@@ -989,10 +989,10 @@ class TelegramController extends Controller{
 		// Объединяем ячейки "B8:D8"
 		//$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
 		
-		$objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Excel5');
-		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xls");
+		$objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xlsx");
 		
-		return "invoice/invoice-".$order->id.".xls";
+		return "invoice/invoice-".$order->id.".xlsx";
 	}
 	
 	// додавання в корзину
