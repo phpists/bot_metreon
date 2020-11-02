@@ -761,7 +761,7 @@ class TelegramController extends Controller{
 								->orderBy('category.sort', 'asc')
 								->select(
 									DB::raw('category.*'), 
-                                    DB::raw('(SELECT COUNT(`subcategory`.`id`) FROM `subcategory` WHERE `subcategory`.`cat_id` = `subcategory`.`id` AND `subcategory`.`public` = 1) as `count_sub`'),
+                                    DB::raw('(SELECT COUNT(`subcategory`.`id`) FROM `subcategory` WHERE `subcategory`.`cat_id` = `category`.`id` AND `subcategory`.`public` = 1) as `count_sub`'),
 									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
 								)
 								->get();
