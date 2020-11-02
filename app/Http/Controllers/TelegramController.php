@@ -958,7 +958,7 @@ class TelegramController extends Controller{
                         ->whereRaw('products.amount > 0')
                         ->where('products.id', $id)
                         ->select(
-                            DB::raw('products.*')
+                            DB::raw('products.*'),
                             DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
                             DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
                         )
