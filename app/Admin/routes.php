@@ -11,6 +11,7 @@ Route::group([
 ], function (Router $router) {
     $router->get('/', 'HomeController@index')->name('admin.home');
     $router->get('/auth/logout', 'AuthController@logout')->name('admin.logout');
+    $router->get('/clients/{id}/approved', 'ClientsController@approved')->name('admin.approved')->where('id', '[0-9]+');
     
     $router->resource('category'			, CategoryController::class);
     $router->resource('products'			, ProductsController::class);

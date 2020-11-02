@@ -13,8 +13,11 @@ use Encore\Admin\Show;
 use Encore\Admin\Layout\Content;
 
 use App\Helpers\StringHelper;
+use App\Helpers\CurlHelper;
 
 use DB;
+
+use Illuminate\Http\Request;
 
 class ClientsController extends MyAdminController {
 	
@@ -59,7 +62,11 @@ class ClientsController extends MyAdminController {
 		
         $grid->column('status'			, __('admin.clients.status.label'))->display(function($status){
             if($status){
-                return __('admin.clients.status.'.$status);
+                if($status == 'new'){
+                    return __('admin.clients.status.new')."<br><a href=\"/clients/".$this->id."/approved\">".__('admin.clients.approved_btn')."</a>";
+                }else{
+                    return __('admin.clients.status.'.$status);
+                }
             }
             
             return '-';
@@ -94,7 +101,7 @@ class ClientsController extends MyAdminController {
 		header('Location: /clients/'.$id.'/edit');
 		return;
 	}
-	
+    
     /**
      * Make a form builder.
      *
@@ -138,5 +145,42 @@ class ClientsController extends MyAdminController {
 		});
 		
         return $form;
+    }
+    
+    function approved(Request $request, $id){
+        $client = Clients::query()->where('id', $id)->first();
+        
+        if($client){
+            $client->status = 'approved';
+            $client->save();
+            
+            $this->sendMessage([
+                'chat_id'		=> $client->chat_id, 
+                'text'			=> __('telegram.request_approved')
+            ]);
+        }
+        
+        header("Location: /clients");
+        return;
+    }
+    
+    private function sendMessage($send, $method = "sendMessage", $post = true, $json = true){
+		$key = env('TELEGRAM_TOKEN', '');
+		
+		if(!$key){
+			return false;
+		}
+		
+        $url = "https://api.telegram.org/bot".$key."/".$method;
+        
+        CurlHelper::setUrl($url);
+		CurlHelper::setTimeout(10);
+		CurlHelper::post($post);
+		CurlHelper::setData($send, false);
+		CurlHelper::json($json);
+				
+		$result = CurlHelper::request(false);
+        
+        return $result;
     }
 }
