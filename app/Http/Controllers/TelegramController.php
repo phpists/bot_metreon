@@ -920,9 +920,11 @@ class TelegramController extends Controller{
                     "amount"		=> ($item->quantity * $item->price)
                 ];
                 
-                $products[] = (object)$insert;
-                
                 OrderProducts::create($insert);
+                
+                $insert["name"] = $item->name;
+                
+                $products[] = (object)$insert;
 			}
 			
 			\Cart::clear();
@@ -934,7 +936,7 @@ class TelegramController extends Controller{
 			
 			//
 			
-			$file = $this->generateExcel($order, $products);
+			$file = $this->generateExcel($order, $date, $products);
 			
 			if($file){
 				$order->file = $file;
@@ -975,7 +977,7 @@ class TelegramController extends Controller{
 		}
 	}
 	
-	function generateExcel($order, $products){
+	function generateExcel($order, $date, $products){
 		if(!is_dir(ROOT."/storage/invoice")){
 			mkdir(ROOT."/storage/invoice");
 		}
@@ -984,14 +986,47 @@ class TelegramController extends Controller{
 		
 		$sheet = $spreadsheet->getActiveSheet(); // Выбираем первый лист в документе
 		
-		// Вставляем заголовок в "B4"
 		$sheet->setCellValue('B4', __('telegram.excel.client', ['client' => $order->username]));
+		$sheet->setCellValue('B8', __('telegram.excel.title', ['id' => $order->id, 'date' => $date]));
 		
-		// Выравниваем по центру
-		//$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		$sheet->setCellValue('A10', __('telegram.excel.number'));
+		$sheet->setCellValue('B10', __('telegram.excel.name'));
+		$sheet->setCellValue('C10', __('telegram.excel.price'));
+		$sheet->setCellValue('D10', __('telegram.excel.count'));
+		$sheet->setCellValue('E10', __('telegram.excel.amount'));
 		
-		// Объединяем ячейки "B8:D8"
-		//$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
+		$styleArray = array(
+			'font'		=> [
+				'bold'			=> true,
+			],
+			'alignment' => [
+				'horizontal'	=> \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+				'vertical' 		=> \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+			],
+		);
+		
+		$sheet->getStyle('A10')->applyFromArray($styleArray);
+		$sheet->getStyle('B10')->applyFromArray($styleArray);
+		$sheet->getStyle('C10')->applyFromArray($styleArray);
+		$sheet->getStyle('D10')->applyFromArray($styleArray);
+		$sheet->getStyle('E10')->applyFromArray($styleArray);
+		
+		\PhpOffice\PhpSpreadsheet\Style\Font->setBold(true);
+		
+		$start = 11;
+		
+		foreach($products as $item){
+			$sheet->setCellValue('A'.$start, $item->product_id);
+			$sheet->setCellValue('B'.$start, $item->name);
+			$sheet->setCellValue('C'.$start, $item->price.__('telegram.excel.rub'));
+			$sheet->setCellValue('D'.$start, $item->count);
+			$sheet->setCellValue('E'.$start, $item->amount.__('telegram.excel.rub'));
+			
+			$start++;
+		}
+		
+		$sheet->setCellValue('D'.$start, __('telegram.excel.total').' '.count($products));
+		$sheet->setCellValue('E'.$start, __('telegram.excel.total').' '.$order->amount.' '.__('telegram.excel.rub'));
 		
 		$objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xlsx");
