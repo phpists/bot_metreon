@@ -348,12 +348,12 @@ class TelegramController extends Controller{
                             
                             $columns[] = "👉 ".$item->name;
                             
-                            if($product->category_name){
-                                $columns[] = " ⌙ ".$product->category_name."\n";
+                            if($item->category_name){
+                                $columns[] = " ⌙ ".$item->category_name."\n";
                             }
                             
-                            if($product->subcategory_name){
-                                $columns[] = "  ⌙ ".$product->subcategory_name."\n";
+                            if($item->subcategory_name){
+                                $columns[] = "  ⌙ ".$item->subcategory_name."\n";
                             }
                             
                             if($image){
@@ -439,12 +439,12 @@ class TelegramController extends Controller{
                             
                             $columns[] = "👉 ".$item->name;
                             
-                            if($product->category_name){
-                                $columns[] = " ⌙ ".$product->category_name."\n";
+                            if($item->category_name){
+                                $columns[] = " ⌙ ".$item->category_name."\n";
                             }
                             
-                            if($product->subcategory_name){
-                                $columns[] = "  ⌙ ".$product->subcategory_name."\n";
+                            if($item->subcategory_name){
+                                $columns[] = "  ⌙ ".$item->subcategory_name."\n";
                             }
                             
                             if($image){
