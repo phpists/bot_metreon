@@ -59,7 +59,11 @@ class TelegramController extends Controller{
         $chat_id	= isset($result["message"]["chat"]["id"]) ? $result["message"]["chat"]["id"] : 0;
         $username	= isset($result["message"]["from"]["username"]) ? $result["message"]["from"]["username"] : "";
         
-        $client     = Clients::query()->where('chat_id', $chat_id)->first();
+        $client     = [];
+        
+        if($chat_id){
+			$client     = Clients::query()->where('chat_id', $chat_id)->first();
+        }
         
         //Клавиатура
         $keyboard	= [
@@ -271,6 +275,8 @@ class TelegramController extends Controller{
 				
 				if($command == 'order'){
 					$chat_id	= $result["callback_query"]["from"]["id"];
+					
+					$client     = Clients::query()->where('chat_id', $chat_id)->first();
 					
 					$this->commandOrder($telegram, $chat_id, $client);
 					
