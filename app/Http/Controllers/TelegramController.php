@@ -1005,6 +1005,8 @@ class TelegramController extends Controller{
 			],
 		);
 		
+		$sheet->getStyle('B8')->applyFromArray($styleArray);
+		
 		$sheet->getStyle('A10')->applyFromArray($styleArray);
 		$sheet->getStyle('B10')->applyFromArray($styleArray);
 		$sheet->getStyle('C10')->applyFromArray($styleArray);
