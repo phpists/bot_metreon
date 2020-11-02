@@ -315,7 +315,15 @@ class TelegramController extends Controller{
                 $command	= $command[0];
                 
                 if($id > 0 && $command == 'sub'){
-                    $tmp = Products::query()->where('public', '1')->where('sub_id', $id)->get();
+                    $tmp = Products::query()
+                                    ->where('products.public', '1')
+                                    ->where('products.sub_id', $id)
+                                    ->select(
+                                        DB::raw('products.*'), 
+                                        DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
+                                        DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
+                                    )
+                                    ->get();
                     
                     if(count($tmp)){
                         foreach($tmp as $item){
@@ -339,6 +347,105 @@ class TelegramController extends Controller{
                             $columns = [];
                             
                             $columns[] = "👉 ".$item->name;
+                            
+                            if($product->category_name){
+                                $columns[] = " ⌙ ".$product->category_name."\n";
+                            }
+                            
+                            if($product->subcategory_name){
+                                $columns[] = "  ⌙ ".$product->subcategory_name."\n";
+                            }
+                            
+                            if($image){
+                                $columns[0] = "<a href='".url($image)."'>".$columns[0]."</a>";
+                            }
+                            
+                            $columns[] = "\n".__('telegram.select_count');
+                            
+                            $keyboard = [
+                                [
+                                    [
+                                        "text"			=> 1,
+                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=1'
+                                    ],
+                                    [
+                                        "text"			=> 2,
+                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
+                                    ]
+                                ],
+                                [
+                                    [
+                                        "text"		    => __('telegram.back'),
+                                        "callback_data" => 'cat-'.$item->cat_id
+                                    ]
+                                ]
+                            ];
+                            
+                            $inline_keyboard = [
+                                'inline_keyboard'	=> $keyboard
+                            ];
+                            
+                            $answer['results'][] = [
+                                'type'  				=> 'article',
+                                'id'  					=> (string)$item->id,
+                                
+                                'title'  				=> $item->name,
+                                'description'			=>  "💳 ".$item->price."".__('telegram.rub'),
+                                
+                                'input_message_content'	=> [
+                                    'message_text'				=> implode("\n", $columns),
+                                    'parse_mode'				=> 'HTML'
+                                ],
+                                
+                                'thumb_url'  			=> $thumb ? url($thumb) : '',
+                                
+                                'reply_markup'			=> $inline_keyboard
+                            ];
+                        }
+                    }
+                }
+                
+                if($id > 0 && $command == 'cat'){
+                    $tmp = Products::query()
+                                    ->where('products.public', '1')
+                                    ->where('products.cat_id', $id)
+                                    ->select(
+                                        DB::raw('products.*'), 
+                                        DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
+                                        DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
+                                    )
+                                    ->get();
+                    
+                    if(count($tmp)){
+                        foreach($tmp as $item){
+                            $image = '';
+                            $thumb = '';
+                            
+                            if($item->image){
+                                $image	= 'storage/'.$item->image;
+                                
+                                if(!file_exists(ROOT.'/../storage/app/admin/'.$item->image)){
+                                    $image = '';
+                                }else{
+                                    $thumb = ImageHelper::thumb('storage/'.$item->image, 60, 60, 'pad');
+                                    
+                                    if(!$thumb){
+                                        $thumb = $image;
+                                    }
+                                }
+                            }
+                            
+                            $columns = [];
+                            
+                            $columns[] = "👉 ".$item->name;
+                            
+                            if($product->category_name){
+                                $columns[] = " ⌙ ".$product->category_name."\n";
+                            }
+                            
+                            if($product->subcategory_name){
+                                $columns[] = "  ⌙ ".$product->subcategory_name."\n";
+                            }
                             
                             if($image){
                                 $columns[0] = "<a href='".url($image)."'>".$columns[0]."</a>";
@@ -656,25 +763,36 @@ class TelegramController extends Controller{
 								->orderBy('category.sort', 'asc')
 								->select(
 									DB::raw('category.*'), 
+                                    DB::raw('(SELECT COUNT(`subcategory`.`id`) FROM `subcategory` WHERE `subcategory`.`cat_id` = `subcategory`.`id` AND `products`.`public` = 1) as `count_sub`'),
 									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
 								)
 								->get();
 		
 		if(count($cat)){
 			foreach($cat as $item){
-				$item->count_products = (int)$item->count_products;
-				
-				if(!$item->count_products){
+				$item->count_sub        = (int)$item->count_sub;
+				$item->count_products   = (int)$item->count_products;
+                
+				if(!$item->count_sub && !$item->count_products){
 					continue;
 				}
 				
-				$items[] = [
-					[
-						"text"								=> $item->name,
-                        "callback_data"                     => 'cat-'.$item->id
-						//"switch_inline_query_current_chat"	=> 'cat-'.$item->id
-					]
-				];
+                if($item->count_sub){
+                    $items[] = [
+                        [
+                            "text"								=> $item->name,
+                            "callback_data"                     => 'cat-'.$item->id
+                            //"switch_inline_query_current_chat"	=> 'cat-'.$item->id
+                        ]
+                    ];
+                }else{
+                    $items[] = [
+                        [
+                            "text"								=> $item->name,
+                            "switch_inline_query_current_chat"	=> 'cat-'.$item->id
+                        ]
+                    ];
+                }
 			}
 		}
         
