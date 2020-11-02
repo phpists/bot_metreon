@@ -82,7 +82,7 @@ class ProductsController extends MyAdminController {
 			return '-';
 		});
 		
-		$grid->column('image'			, __('admin.products.image'))->image();
+		//$grid->column('image'			, __('admin.products.image'))->image();
         
         $model = $grid->model();
         
@@ -156,7 +156,7 @@ class ProductsController extends MyAdminController {
 			
 			$form->select('sub_id'		, __('admin.products.subcategory'))->options(($subcategory ? ([null => ''] + $subcategory) : []));
 			
-			$form->image('image'		, __('admin.products.image'))->removable();
+			//$form->image('image'		, __('admin.products.image'))->removable();
 		});
 		
 		// callback before save
