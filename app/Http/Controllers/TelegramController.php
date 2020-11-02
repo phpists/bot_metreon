@@ -977,7 +977,7 @@ class TelegramController extends Controller{
 		
 		$document = new \PHPExcel();
 		
-		$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
+		//$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
 		
 		$columnPosition = 1; // Начальная координата x
 		$startLine		= 4; // Начальная координата y
