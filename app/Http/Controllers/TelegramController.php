@@ -879,6 +879,8 @@ class TelegramController extends Controller{
 		
 		$cart = \Cart::getContent();
 		
+		$order_insert = [];
+		
 		if(count($cart)){
 			$total = 0;
 			
@@ -940,6 +942,10 @@ class TelegramController extends Controller{
 				'reply_markup'	=> $inline_keyboard
 			]
 		);
+		
+		if($order_insert){
+			$this->sendMessages(["id" => $order->id, "date" => $date, "amount" => $total], 'new_order', true);
+		}
 	}
 	
 	// додавання в корзину
