@@ -132,7 +132,9 @@ class ClientsController extends MyAdminController {
 		$form->saving(function (Form $form){
 			$form->name			= trim($form->name);
             $form->username		= trim($form->username);
-            $form->phone		= trim($form->phone);
+            //$form->phone		= trim($form->phone);
+            
+            $form->phone 	    = (string)preg_replace('/[^0-9]/', '', $form->phone);
 		});
 		
         return $form;
