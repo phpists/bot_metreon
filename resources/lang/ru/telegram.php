@@ -45,8 +45,8 @@ return [
     'select_category'               => "Выберите категорию ⤵️",
     'select_subcategory'            => "Выберите подкатегорию ⤵️",
     
-    'back'                          => "Назад",
-    'category_btn'                  => " Категории",
+    'back'                          => "⬅ Назад",
+    'category_btn'                  => "⬅ Категории",
     
     'select_count'                  => "Выберите количество с кнопок ниже ⤵️",
     
