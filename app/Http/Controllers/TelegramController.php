@@ -1013,20 +1013,51 @@ class TelegramController extends Controller{
 		$sheet->getStyle('D10')->applyFromArray($styleArray);
 		$sheet->getStyle('E10')->applyFromArray($styleArray);
 		
+		$styleArray = array(
+			'font'		=> [],
+			'alignment' => [
+				'horizontal'	=> \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+				'vertical' 		=> \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+			],
+		);
+		
 		$start = 11;
 		
 		foreach($products as $item){
 			$sheet->setCellValue('A'.$start, $item->product_id);
+			$sheet->getStyle('A'.$start)->applyFromArray($styleArray);
+			
 			$sheet->setCellValue('B'.$start, $item->name);
+			$sheet->getStyle('B'.$start)->applyFromArray($styleArray);
+			
 			$sheet->setCellValue('C'.$start, $item->price.__('telegram.excel.rub'));
+			$sheet->getStyle('C'.$start)->applyFromArray($styleArray);
+			
 			$sheet->setCellValue('D'.$start, $item->count);
+			$sheet->getStyle('D'.$start)->applyFromArray($styleArray);
+			
 			$sheet->setCellValue('E'.$start, $item->amount.__('telegram.excel.rub'));
+			$sheet->getStyle('E'.$start)->applyFromArray($styleArray);
 			
 			$start++;
 		}
 		
 		$sheet->setCellValue('D'.$start, __('telegram.excel.total').' '.count($products));
+		$sheet->getStyle('D'.$start)->applyFromArray($styleArray);
+		
 		$sheet->setCellValue('E'.$start, __('telegram.excel.total').' '.$order->amount.' '.__('telegram.excel.rub'));
+		
+		$styleArray = array(
+			'font'		=> [
+				'bold'			=> true,
+			],
+			'alignment' => [
+				'horizontal'	=> \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+				'vertical' 		=> \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+			],
+		);
+		
+		$sheet->getStyle('E'.$start)->applyFromArray($styleArray);
 		
 		$objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xlsx");
