@@ -976,7 +976,7 @@ class TelegramController extends Controller{
 			mkdir(ROOT."/storage/invoice");
 		}
 		
-		$spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 		
 		$sheet = $spreadsheet->getActiveSheet(); // Выбираем первый лист в документе
 		
