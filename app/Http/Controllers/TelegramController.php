@@ -1266,10 +1266,15 @@ class TelegramController extends Controller{
 		$sheet->getStyle('D10')->applyFromArray($styleArray);
 		$sheet->getStyle('E10')->applyFromArray($styleArray);
         
-        //$spreadsheet->getActiveSheet()->getRowDimension('10')->setRowHeight(100);
-        //$spreadsheet->getActiveSheet()->getRowDimension('4')->setRowHeight(100);
+        //$sheet->getRowDimension('10')->setRowHeight(100);
+        //$sheet->getRowDimension('4')->setRowHeight(100);
         
-        $spreadsheet->getActiveSheet()->getRowDimension('8')->setRowHeight(50);
+        $sheet->getRowDimension('8')->setRowHeight(50);
+        
+        $sheet->getColumnDimension("B")->setAutoSize(true);
+        $sheet->getColumnDimension("C")->setAutoSize(true);
+        $sheet->getColumnDimension("D")->setAutoSize(true);
+        $sheet->getColumnDimension("E")->setAutoSize(true);
         
 		$styleArray = array(
 			'font'		=> [],
@@ -1297,7 +1302,7 @@ class TelegramController extends Controller{
 			$sheet->setCellValue('E'.$start, $item->amount.__('telegram.excel.rub'));
 			$sheet->getStyle('E'.$start)->applyFromArray($styleArray);
             
-            //$spreadsheet->getActiveSheet()->getRowDimension($start)->setRowHeight(100);
+            //$sheet->getRowDimension($start)->setRowHeight(100);
             
 			$start++;
 		}
