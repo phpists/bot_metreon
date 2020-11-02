@@ -967,7 +967,11 @@ class TelegramController extends Controller{
 		);
 		
 		if($order_insert){
-			$this->sendMessages(["id" => $order->id, "date" => $date, "amount" => $total], 'new_order', true);
+			if($file){
+				$this->sendDocument($chat_id, ROOT.'/storage/'.$file);
+			}
+			
+			$this->sendMessages(["id" => $order->id, "date" => $date, "amount" => $total, "file" => $file], 'new_order', true);
 		}
 	}
 	
@@ -1336,7 +1340,21 @@ class TelegramController extends Controller{
 					true, 
 					true
 				);
+				
+				if($key == 'new_order' && $data['file']){
+					$this->sendDocument($item->chat_id, ROOT.'/storage/'.$data['file']);
+				}
 			}
 		}
+	}
+	
+	private function sendDocument($chat_id, $file){
+		$key = env('TELEGRAM_TOKEN', '');
+		
+		$bot = new \TelegramBot\Api\BotApi($key);
+		
+		$document = new \CURLFile($file);
+		
+		$bot->sendDocument($chat_id, $document);
 	}
 }
