@@ -204,6 +204,10 @@ class TelegramController extends Controller{
                         
                         $this->commandProducts($telegram, $chat_id, $id, $params);
                     }
+                    
+                    if($command == 'product'){
+                        $this->commandProduct($telegram, $chat_id, $id);
+                    }
 				}
 			}else{
 				$command	= $command[0];
@@ -942,6 +946,68 @@ class TelegramController extends Controller{
 			[
 				'chat_id'		=> $chat_id, 
 				'text'			=> __('telegram.select_a_product'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+    
+    function commandProduct(&$telegram, $chat_id, $id){
+        $product = Products::query()
+                        ->where('products.public', '1')
+                        ->whereRaw('products.amount > 0')
+                        ->where('products.id', $id)
+                        ->select(
+                            DB::raw('products.*')
+                            DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
+                            DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
+                        )
+                        ->first();
+        
+        $keyboard = [];
+        
+        if($product){
+            $answer = __('telegram.select_count');
+            
+            $keyboard[] = [
+                [
+                    "text"			=> 1,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=1'
+                ]
+            ];
+            
+            if($product->amount > 1){
+                $keyboard[0][] = [
+                    "text"			=> 2,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=2'
+                ];
+            }
+            
+            $keyboard[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
+                ]
+            ];
+        }else{
+            $answer = __('telegram.product_not_found');
+            
+            $keyboard[] = [
+                [
+                    "text"		    => __('telegram.main'),
+                    "callback_data" => 'start'
+                ]
+            ];
+        }
+        
+        $inline_keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
+		]);
+        
+        $this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> $answer,
 				'parse_mode'	=> 'Markdown',
 				'reply_markup'	=> $inline_keyboard
 			]

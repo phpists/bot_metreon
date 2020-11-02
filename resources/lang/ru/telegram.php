@@ -94,5 +94,7 @@ return [
 		'total'							=> "Всего:",
     ],
     
-    'select_a_product'              => "Выберите товар ⬇"
+    'select_a_product'              => "Выберите товар ⬇",
+    
+    'product_not_found'             => "Товар не найден",
 ];
