@@ -890,7 +890,9 @@ class TelegramController extends Controller{
 				"status"		=> "new",
 				"created_at"	=> date("Y-m-d H:i:s"),
 				"amount"		=> $total,
-				"chat_id"		=> $chat_id
+				"chat_id"		=> $chat_id,
+				"client_id"		=> $client->id,
+				"name"			=> $client->name
 			];
             
 			$order = Orders::create($order_insert);
