@@ -127,7 +127,7 @@ class TelegramController extends Controller{
                     return response()->json([], 200);
                 }
                 
-                if($text == "Корзина"){
+                if($text == "Корзина" || $text == "/cart"){
                     $this->commandCart($telegram, $chat_id);
                 }
             }
