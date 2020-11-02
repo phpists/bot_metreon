@@ -731,7 +731,9 @@ class TelegramController extends Controller{
     function commandSubcategoryList(&$telegram, $result, $chat_id, $id){
         $items = [];
 		
-		$cat = SubCategory::query()->where('subcategory.public', '1')
+		$cat = SubCategory::query()
+                                ->where('subcategory.public', '1')
+                                ->where('subcategory.cat_id', $id)
 								->orderBy('subcategory.sort', 'asc')
 								->select(
 									DB::raw('subcategory.*'), 
