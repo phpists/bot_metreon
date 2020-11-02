@@ -1402,7 +1402,8 @@ class TelegramController extends Controller{
 			[
 				[
 					"text"		    => __('telegram.back'),
-                    "callback_data" => $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
+                    "callback_data" => 'product-'.$product->id,
+                    //"callback_data" => $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
 					//"switch_inline_query_current_chat"	=> $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
 				]
 			]
