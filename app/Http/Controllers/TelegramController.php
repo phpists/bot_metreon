@@ -755,9 +755,9 @@ class TelegramController extends Controller{
         ];
         
         \Cart::session($chat_id);
-		$total = \Cart::getTotal();
+		$cart = \Cart::getContent();
 		
-		if($total){
+		if($cart){
 			$items[] = [
 				[
 					"text"				=> __('telegram.go_to_cart'),
