@@ -249,6 +249,10 @@ class TelegramController extends Controller{
                         $this->commandSubcategoryList($telegram, $result, $chat_id, $id);
                     }
                     
+                    if($command == 'remove'){
+                        $this->commandRemove($telegram, $result, $chat_id, $id);
+                    }
+                    
 					if($command == 'data'){
 						$hash = explode("&", $hash);
 						
@@ -1053,6 +1057,12 @@ class TelegramController extends Controller{
 			],
 			[
 				[
+					"text"		    => __('telegram.cart_btn'),
+					"callback_data" => 'cart'
+				]
+			],
+			[
+				[
 					"text"		    => __('telegram.category_btn'),
 					"callback_data" => 'start'
 				]
@@ -1068,6 +1078,58 @@ class TelegramController extends Controller{
 		$inline_keyboard = json_encode([
 			'inline_keyboard'	=> $keyboard
 		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> $answer,
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+	}
+	
+	function commandRemove(&$telegram, $result, $chat_id, $id){
+		\Cart::session($chat_id);
+		
+		$product = Products::query()
+							->where('products.id', $id)
+							->select(
+								'products.cat_id',
+								'products.sub_id'
+							)
+							->first();
+		
+		if(\Cart::get($product->id)){
+			\Cart::remove($product->id);
+		}
+		
+		$keyboard	= [
+			[
+				[
+					"text"		    => __('telegram.category_btn'),
+					"callback_data" => 'start'
+				]
+			],
+			[
+				[
+					"text"		    => __('telegram.cart_btn'),
+					"callback_data" => 'cart'
+				]
+			],
+			[
+				[
+					"text"		    => __('telegram.back'),
+					"switch_inline_query_current_chat"	=> 'sub-'.$product->sub_id
+				]
+			]
+		];
+		
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
+		]);
+		
+		$answer = __('telegram.removed_from_cart')." 🛒";
 		
 		$this->sendMessage(
 			[
