@@ -1232,6 +1232,8 @@ class TelegramController extends Controller{
 		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
 		$sheet = $spreadsheet->getActiveSheet(); // Выбираем первый лист в документе
+        
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(14);
 
 		$sheet->setCellValue('B4', __('telegram.excel.client', ['client' => $order->username]));
 
@@ -1246,23 +1248,28 @@ class TelegramController extends Controller{
 		$styleArray = array(
 			'font'		=> [
 				'bold'			=> true,
+                'size'          => 28
 			],
 			'alignment' => [
 				'horizontal'	=> \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
 				'vertical' 		=> \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
 			],
 		);
-
+        
 		$sheet->getStyle('B8')->applyFromArray($styleArray);
-
+        
+        $styleArray['font']['size'] = 18;
+        
 		$sheet->getStyle('A10')->applyFromArray($styleArray);
 		$sheet->getStyle('B10')->applyFromArray($styleArray);
 		$sheet->getStyle('C10')->applyFromArray($styleArray);
 		$sheet->getStyle('D10')->applyFromArray($styleArray);
 		$sheet->getStyle('E10')->applyFromArray($styleArray);
+        
         $spreadsheet->getActiveSheet()->getRowDimension('10')->setRowHeight(100);
         $spreadsheet->getActiveSheet()->getRowDimension('4')->setRowHeight(100);
         $spreadsheet->getActiveSheet()->getRowDimension('8')->setRowHeight(100);
+        
 		$styleArray = array(
 			'font'		=> [],
 			'alignment' => [
@@ -1288,7 +1295,9 @@ class TelegramController extends Controller{
 
 			$sheet->setCellValue('E'.$start, $item->amount.__('telegram.excel.rub'));
 			$sheet->getStyle('E'.$start)->applyFromArray($styleArray);
+            
             $spreadsheet->getActiveSheet()->getRowDimension($start)->setRowHeight(100);
+            
 			$start++;
 		}
 
