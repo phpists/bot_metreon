@@ -979,13 +979,13 @@ class TelegramController extends Controller{
 		$startLine		= 4; // Начальная координата y
 		
 		// Вставляем заголовок в "B4" 
-		$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, __('telegram.excel.client', ['client' => $order->username]));
+		//$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, __('telegram.excel.client', ['client' => $order->username]));
 		
 		// Выравниваем по центру
-		$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 		
 		// Объединяем ячейки "B8:D8"
-		$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
+		//$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
 		
 		$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
 		$objWriter->save("invoice-".$order->id.".xls");
