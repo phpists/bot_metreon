@@ -111,7 +111,7 @@ class ClientsController extends MyAdminController {
         
         $form->text('username'		, __('admin.clients.username'))->rules('max:30');
         
-        $form->text('phone'			, __('admin.clients.phone'))->rules('min:9|max:21');
+        $form->text('phone'			, __('admin.clients.phone'))->rules('max:21');
 		
 		$form->text('address'		, __('admin.clients.address'))->rules('max:200');
         
