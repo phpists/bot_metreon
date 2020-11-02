@@ -36,7 +36,7 @@ return [
     
     'request_not_found'             => 'Заявка не найдена',
     
-    'request_processed'             => 'Ваша заявка обработана, приступайте к заказам',
+    'request_processed'             => 'Ваша заявка обработана, приступайте к заказам!',
     
     'request_being_processed'       => 'Ваша заявка на обработке',
     
