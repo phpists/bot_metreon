@@ -272,7 +272,7 @@ class TelegramController extends Controller{
 				if($command == 'order'){
 					$chat_id	= $result["callback_query"]["from"]["id"];
 					
-					$this->commandOrder($telegram, $chat_id, false);
+					$this->commandOrder($telegram, $chat_id, $client);
 					
 					return;
 				}
@@ -874,7 +874,7 @@ class TelegramController extends Controller{
 		}
 	}
     
-    function commandOrder(&$telegram, $chat_id, $result){
+    function commandOrder(&$telegram, $chat_id, $client){
 		\Cart::session($chat_id);
 		
 		$cart = \Cart::getContent();
@@ -887,9 +887,10 @@ class TelegramController extends Controller{
 			}
 			
             $order_insert = [
-				"status"	=> "new",
-				"amount"	=> $total,
-				"chat_id"	=> $chat_id
+				"status"		=> "new",
+				"created_at"	=> date("Y-m-d H:i:s"),
+				"amount"		=> $total,
+				"chat_id"		=> $chat_id
 			];
             
 			$order = Orders::create($order_insert);
@@ -908,113 +909,20 @@ class TelegramController extends Controller{
 			
 			\Cart::clear();
 			
-			$client = Clients::query()->where('chat_id', $chat_id)->first();
+			$time = strtotime($order_insert["created_at"]);
+			$date = date("m.d.Y", $time);
 			
-			if(!$client){
-				$client = Clients::create([
-					'chat_id' => $chat_id
-				]);
-			}
-			
-			$upd = false;
-			
-			if(isset($result["message"]["from"]["username"])){
-				if($result["message"]["from"]["username"] && $result["message"]["from"]["username"] != $client->username){
-					$client->username = $result["message"]["from"]["username"];
-					
-					$upd = true;
-				}
-			}
-			
-			if(isset($result["message"]["from"]["first_name"])){
-				if($result["message"]["from"]["first_name"] && $result["message"]["from"]["first_name"] != $client->name){
-					$client->name = $result["message"]["from"]["first_name"];
-					
-					$upd = true;
-				}
-			}
-			
-			if($upd){
-				$client->save();
-			}
-			
-			$fio = $client->name;
-			
-			$answer		= "";
-			$keyboard	= [
-				[
-					["text" => "Відміна"]
-				]
-			];
-			
-			$type		= "";
-			
-			if(!$fio){
-				$answer = "Введіть ім'я ⌨️⤵️";
-				
-				$type	= "name";
-			}else{
-				$answer = "Записуємо вас як ".$fio."? 😎";
-				
-				$keyboard	= [
-					[
-						["text" => "Так"],
-						["text" => "Введу вручну"]
-					],
-					[
-						["text" => "Відміна"]
-					]
-				];
-				
-				$type	= "confirm_name";
-			}
-			
-			if($keyboard){
-				$reply_markup = $telegram->replyKeyboardMarkup([
-					'keyboard'			=> $keyboard, 
-					'resize_keyboard'	=> true, 
-					'one_time_keyboard'	=> false
-				]);
-			}else{
-				$reply_markup = $telegram->replyKeyboardHide([
-					'hide_keyboard' => true,
-					'selective'     => false,
-				]);
-			}
-			
-			//
-			
-			$message = $this->sendMessage([
-				'chat_id'		=> $chat_id, 
-				'text'			=> $answer,
-				'reply_markup'	=> $reply_markup
-			]);
-			
-			if($type){
-				$id = md5($order->id.'-'.$chat_id.'-'.$message['result']['date']);
-				
-				Messages::create([
-					"id"			=> $id,
-					"product_id"	=> 0,
-					"message_id"	=> $message['result']['message_id'],
-					"chat_id"		=> $chat_id,
-					"date"			=> $message['result']['date'],
-					"type"			=> $type,
-					"data"			=> $order->id
-				]);
-			}
-			
-			return;
+			$answer = __('telegram.order_info', ["id" => $order->id, "date" => $date, "amount" => $total]);
+		}else{
+			$answer = __('telegram.empty_cart');
 		}
-		
-		$answer = "🛒 Кошик порожній";
 		
 		$items = [];
 		
 		$items[] = [
 			[
-				"text"								=> "↩️ Головне меню",
-				"callback_data"						=> "start"
+				"text"			=> __('telegram.main'),
+				"callback_data"	=> "start"
 			]
 		];
 		
