@@ -290,7 +290,7 @@ return [
     | "sidebar-mini".
     |
     */
-    'layout' => ['sidebar-mini', 'sidebar-collapse'],
+    'layout' => ["fixed", 'sidebar-mini', 'sidebar-collapse'],
 
     /*
     |--------------------------------------------------------------------------
