@@ -290,6 +290,14 @@ class TelegramController extends Controller{
 					return;
 				}
 				
+				if($command == 'clear'){
+					$chat_id	= $result["callback_query"]["from"]["id"];
+					
+					$this->commandClear($telegram, $chat_id);
+					
+					return;
+				}
+				
 				if($command == 'order'){
 					$chat_id	= $result["callback_query"]["from"]["id"];
 					
@@ -661,6 +669,100 @@ class TelegramController extends Controller{
     
     //
     
+    function commandCategoryList(&$telegram, $chat_id){
+        $items = [];
+		
+		$cat = Category::query()->where('category.public', '1')
+								->orderBy('category.sort', 'asc')
+								->select(
+									DB::raw('category.*'), 
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
+								)
+								->get();
+		
+		if(count($cat)){
+			foreach($cat as $item){
+				$item->count_products = (int)$item->count_products;
+				
+				if(!$item->count_products){
+					continue;
+				}
+				
+				$items[] = [
+					[
+						"text"								=> $item->name,
+                        "callback_data"                     => 'cat-'.$item->id
+						//"switch_inline_query_current_chat"	=> 'cat-'.$item->id
+					]
+				];
+			}
+		}
+        
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> __('telegram.select_category'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+    
+    function commandSubcategoryList(&$telegram, $result, $chat_id, $id){
+        $items = [];
+		
+		$cat = SubCategory::query()->where('subcategory.public', '1')
+								->orderBy('subcategory.sort', 'asc')
+								->select(
+									DB::raw('subcategory.*'), 
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`sub_id` = `subcategory`.`id` AND `products`.`public` = 1) as `count_products`')
+								)
+								->get();
+		
+		if(count($cat)){
+			foreach($cat as $item){
+				$item->count_products = (int)$item->count_products;
+				
+				if(!$item->count_products){
+					continue;
+				}
+				
+				$items[] = [
+					[
+						"text"								=> $item->name,
+						"switch_inline_query_current_chat"	=> 'sub-'.$item->id
+					]
+				];
+			}
+		}
+        
+        $items[] = [
+            [
+                "text"		    => __('telegram.back'),
+                "callback_data" => 'start'
+            ]
+        ];
+        
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> __('telegram.select_subcategory'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+    
+	// cart
+    
 	function commandCart(&$telegram, $chat_id){
 		\Cart::session($chat_id);
 		
@@ -911,102 +1013,6 @@ class TelegramController extends Controller{
 		);
 	}
 	
-    //
-    
-    function commandCategoryList(&$telegram, $chat_id){
-        $items = [];
-		
-		$cat = Category::query()->where('category.public', '1')
-								->orderBy('category.sort', 'asc')
-								->select(
-									DB::raw('category.*'), 
-									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
-								)
-								->get();
-		
-		if(count($cat)){
-			foreach($cat as $item){
-				$item->count_products = (int)$item->count_products;
-				
-				if(!$item->count_products){
-					continue;
-				}
-				
-				$items[] = [
-					[
-						"text"								=> $item->name,
-                        "callback_data"                     => 'cat-'.$item->id
-						//"switch_inline_query_current_chat"	=> 'cat-'.$item->id
-					]
-				];
-			}
-		}
-        
-		$inline_keyboard = json_encode([
-			'inline_keyboard'	=> $items
-		]);
-		
-		$this->sendMessage(
-			[
-				'chat_id'		=> $chat_id, 
-				'text'			=> __('telegram.select_category'),
-				'parse_mode'	=> 'Markdown',
-				'reply_markup'	=> $inline_keyboard
-			]
-		);
-    }
-    
-    function commandSubcategoryList(&$telegram, $result, $chat_id, $id){
-        $items = [];
-		
-		$cat = SubCategory::query()->where('subcategory.public', '1')
-								->orderBy('subcategory.sort', 'asc')
-								->select(
-									DB::raw('subcategory.*'), 
-									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`sub_id` = `subcategory`.`id` AND `products`.`public` = 1) as `count_products`')
-								)
-								->get();
-		
-		if(count($cat)){
-			foreach($cat as $item){
-				$item->count_products = (int)$item->count_products;
-				
-				if(!$item->count_products){
-					continue;
-				}
-				
-				$items[] = [
-					[
-						"text"								=> $item->name,
-						"switch_inline_query_current_chat"	=> 'sub-'.$item->id
-					]
-				];
-			}
-		}
-        
-        $items[] = [
-            [
-                "text"		    => __('telegram.back'),
-                "callback_data" => 'start'
-            ]
-        ];
-        
-		$inline_keyboard = json_encode([
-			'inline_keyboard'	=> $items
-		]);
-		
-		$this->sendMessage(
-			[
-				'chat_id'		=> $chat_id, 
-				'text'			=> __('telegram.select_subcategory'),
-				'parse_mode'	=> 'Markdown',
-				'reply_markup'	=> $inline_keyboard
-			]
-		);
-    }
-    
-	//
-	
 	// додавання в корзину
 	function commandAdd(&$telegram, $chat_id, $id, $params){
 		\Cart::session($chat_id);
@@ -1157,6 +1163,35 @@ class TelegramController extends Controller{
 		]);
 		
 		$answer = __('telegram.removed_from_cart')." 🛒";
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> $answer,
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+	}
+	
+	function commandClear(&$telegram, $chat_id){
+		\Cart::session($chat_id);
+		\Cart::clear();
+		
+		$keyboard	= [
+			[
+				[
+					"text"		    => __('telegram.main'),
+					"callback_data" => 'start'
+				]
+			]
+		];
+		
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
+		]);
+		
+		$answer = __('telegram.shopping_cleared');
 		
 		$this->sendMessage(
 			[

@@ -70,4 +70,6 @@ return [
     'empty_cart'					=> "Еще пусто, сначала выберите товар",
     
     'amount'						=> "💳 Итого :amount₽",
+    
+    'shopping_cleared'             	=> "Корзина очищена 🛒",
 ];
