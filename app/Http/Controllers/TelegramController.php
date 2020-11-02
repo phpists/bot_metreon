@@ -78,9 +78,25 @@ class TelegramController extends Controller{
                         $message = null;
                     }elseif($message->type == "request"){
                         $this->commandRequest($telegram, $result, $text, $chat_id, $client);
-
+                        
                         $message    = null;
                         $text       = null;
+                    }elseif($message->type == "count"){
+                        Messages::query()->where('chat_id', $chat_id)->delete();
+                        
+                        if($text != "/reset"){
+                            $params = ['type' => '', 'count' => $text];
+                            
+                            $this->commandAdd($telegram, $chat_id, $id, $params);
+                            
+                            $message    = null;
+                            $text       = null;
+                        }else{
+                            $this->commandProduct($telegram, $chat_id, $message->product_id);
+                            
+                            $message    = null;
+                            $text       = null;
+                        }
                     }
                 }
 			}
@@ -132,7 +148,7 @@ class TelegramController extends Controller{
                 }
             }
 		}
-
+        
 		if(isset($result["callback_query"])){
 			$chat_id	= $result["callback_query"]["from"]["id"];
 
@@ -208,6 +224,10 @@ class TelegramController extends Controller{
                     if($command == 'product'){
                         $this->commandProduct($telegram, $chat_id, $id);
                     }
+                    
+                    if($command == 'more'){
+                        $this->commandMore($telegram, $chat_id, $id);
+                    }
 				}
 			}else{
 				$command	= $command[0];
@@ -255,7 +275,7 @@ class TelegramController extends Controller{
 				}
 			}
 		}
-
+        
 		if(isset($result["inline_query"])){
 			$answer = [
 				'inline_query_id'		=> $result["inline_query"]["id"],
@@ -470,7 +490,7 @@ class TelegramController extends Controller{
 			$this->sendMessage($answer, "answerInlineQuery", true, false);
 			return;
 		}
-
+        
         return response()->json([], 200);
     }
 
@@ -967,27 +987,38 @@ class TelegramController extends Controller{
         $keyboard = [];
         
         if($product){
-            if($product->amount < 11){
-                $answer = __('telegram.select_count');
-                
-                $n = 0;
-                
-                for($i = 1; $i <= $product->amount; $i++){
-                    if(!isset($keyboard[$n])){
-                        $keyboard[$n] = [];
-                    }
-                    
-                    $keyboard[$n][] = [
-                        "text"			=> $i,
-                        "callback_data"	=> 'data-'.$product->id.'#type=count&count='.$i
-                    ];
-                    
-                    if(($i % 2) == 0){
-                        $n++;
-                    }
-                }
+            if($product->amount > 10){
+                $max = 10;
             }else{
-                $answer = __('telegram.enter_count');
+                $max = $product->amount;
+            }
+            
+            $answer = __('telegram.select_count');
+            
+            $n = 0;
+            
+            for($i = 1; $i <= $max; $i++){
+                if(!isset($keyboard[$n])){
+                    $keyboard[$n] = [];
+                }
+                
+                $keyboard[$n][] = [
+                    "text"			=> $i,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count='.$i
+                ];
+                
+                if(($i % 2) == 0){
+                    $n++;
+                }
+            }
+            
+            if($product->amount > 10){
+                $keyboard[] = [
+                    [
+                        "text"		    => __('telegram.more'),
+                        "callback_data" => 'more-'.$product->id
+                    ]
+                ];
             }
             
             $keyboard[] = [
@@ -1020,7 +1051,44 @@ class TelegramController extends Controller{
 			]
 		);
     }
-
+    
+    function commandMore(&$telegram, $chat_id, $id){
+        $message_id = md5($id.'-'.$chat_id.'-count-'.time());
+        
+        Messages::create([
+            "id"			=> $message_id,
+            "product_id"	=> $id,
+            "message_id"	=> 0,
+            "chat_id"		=> $chat_id,
+            "date"			=> "",
+            "type"			=> "count"
+        ]);
+        
+        $answer = __('telegram.enter_count');
+        
+        $keyboard = [];
+        
+        $keyboard[] = [
+            [
+                "text"		    => __('telegram.cancel'),
+                "callback_data" => 'reset'
+            ]
+        ];
+        
+        $keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
+		]);
+        
+        $this->sendMessage(
+			[
+				'chat_id'		=> $chat_id,
+				'text'			=> $answer,
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $keyboard
+			]
+		);
+    }
+    
 	// cart
 
 	function commandCart(&$telegram, $chat_id){
@@ -1342,8 +1410,8 @@ class TelegramController extends Controller{
 
 	// додавання в корзину
 	function commandAdd(&$telegram, $chat_id, $id, $params){
-		\Cart::session($chat_id);
-
+        $params['count'] = preg_replace('/[^0-9]/', '', $params['count']);
+        
 		$product = Products::query()
 							->leftJoin('category', 'category.id', '=', 'products.cat_id')
 							->leftJoin('subcategory', 'subcategory.id', '=', 'products.sub_id')
@@ -1354,7 +1422,135 @@ class TelegramController extends Controller{
 								'subcategory.name as sub_name'
 							)
 							->first();
-
+        
+        if($product->amount > 0){
+            if($params['count'] < 1){
+                $answer = __('telegram.invalid_count');
+                $answer .= "\n";
+                $answer .= __('telegram.enter_count');
+                
+                $keyboard	= [
+                    [
+                        [
+                            "text"		    => __('telegram.cart_btn'),
+                            "callback_data" => 'cart'
+                        ]
+                    ],
+                    [
+                        [
+                            "text"		    => __('telegram.category_btn'),
+                            "callback_data" => 'start'
+                        ]
+                    ]
+                ];
+                
+                $inline_keyboard = json_encode([
+                    'inline_keyboard'	=> $keyboard
+                ]);
+                
+                $this->sendMessage(
+                    [
+                        'chat_id'		=> $chat_id,
+                        'text'			=> $answer,
+                        'parse_mode'	=> 'Markdown',
+                        'reply_markup'	=> $inline_keyboard
+                    ]
+                );
+                
+                $message_id = md5($id.'-'.$chat_id.'-count-'.time());
+                
+                Messages::create([
+                    "id"			=> $message_id,
+                    "product_id"	=> $id,
+                    "message_id"	=> 0,
+                    "chat_id"		=> $chat_id,
+                    "date"			=> "",
+                    "type"			=> "count"
+                ]);
+                
+                return false;
+            }elseif($product->amount > $params['count']){
+                $answer = __('telegram.max_count', ['count' => $product->amount]);
+                $answer .= "\n";
+                $answer .= __('telegram.enter_count');
+                
+                $keyboard	= [
+                    [
+                        [
+                            "text"		    => __('telegram.cart_btn'),
+                            "callback_data" => 'cart'
+                        ]
+                    ],
+                    [
+                        [
+                            "text"		    => __('telegram.category_btn'),
+                            "callback_data" => 'start'
+                        ]
+                    ]
+                ];
+                
+                $inline_keyboard = json_encode([
+                    'inline_keyboard'	=> $keyboard
+                ]);
+                
+                $this->sendMessage(
+                    [
+                        'chat_id'		=> $chat_id,
+                        'text'			=> $answer,
+                        'parse_mode'	=> 'Markdown',
+                        'reply_markup'	=> $inline_keyboard
+                    ]
+                );
+                
+                $message_id = md5($id.'-'.$chat_id.'-count-'.time());
+                
+                Messages::create([
+                    "id"			=> $message_id,
+                    "product_id"	=> $id,
+                    "message_id"	=> 0,
+                    "chat_id"		=> $chat_id,
+                    "date"			=> "",
+                    "type"			=> "count"
+                ]);
+                
+                return false;
+            }
+        }else{
+            $answer = __('telegram.out_of_stock');
+            
+            $keyboard	= [
+                [
+                    [
+                        "text"		    => __('telegram.cart_btn'),
+                        "callback_data" => 'cart'
+                    ]
+                ],
+                [
+                    [
+                        "text"		    => __('telegram.category_btn'),
+                        "callback_data" => 'start'
+                    ]
+                ]
+            ];
+            
+            $inline_keyboard = json_encode([
+                'inline_keyboard'	=> $keyboard
+            ]);
+            
+            $this->sendMessage(
+                [
+                    'chat_id'		=> $chat_id,
+                    'text'			=> $answer,
+                    'parse_mode'	=> 'Markdown',
+                    'reply_markup'	=> $inline_keyboard
+                ]
+            );
+            
+            return false;
+        }
+        
+        \Cart::session($chat_id);
+        
 		if(\Cart::get($product->id)){
 			\Cart::update($product->id, array(
 				'name'				=> $product->name,
@@ -1377,9 +1573,9 @@ class TelegramController extends Controller{
 				)
 			));
 		}
-
+        
 		//
-
+        
 		$answer = __('telegram.added_to_cart')." 🛒";
 
 		$reply_markup = $telegram->replyKeyboardHide([
@@ -1436,11 +1632,11 @@ class TelegramController extends Controller{
 				]
 			]
 		];
-
+        
 		$inline_keyboard = json_encode([
 			'inline_keyboard'	=> $keyboard
 		]);
-
+        
 		$this->sendMessage(
 			[
 				'chat_id'		=> $chat_id,
