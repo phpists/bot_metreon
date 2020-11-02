@@ -85,9 +85,7 @@ class TelegramController extends Controller{
                     if($message->type == "code"){
                         $this->codeVerification($result, $text, $chat_id, $username);
                         $message = null;
-                    }
-                    
-                    if($message->type == "request"){
+                    }elseif($message->type == "request"){
                         $this->commandRequest($telegram, $result, $text, $chat_id, $client);
                         
                         $message    = null;
