@@ -27,6 +27,8 @@ use App\Models\Admins;
 
 use Darryldecode\Cart\Cart;
 
+use PHPOffice/PHPExcel;
+
 class TelegramController extends Controller{
 	
     public function WebHook(Request $request){
@@ -900,10 +902,13 @@ class TelegramController extends Controller{
 				"amount"		=> $total,
 				"chat_id"		=> $chat_id,
 				"client_id"		=> $client->id,
-				"name"			=> $client->name
+				"name"			=> $client->name,
+				"username"		=> $client->username
 			];
             
 			$order = Orders::create($order_insert);
+            
+            $products = [];
             
 			foreach($cart as $item){
 				$insert = [
@@ -914,6 +919,8 @@ class TelegramController extends Controller{
                     "amount"		=> ($item->quantity * $item->price)
                 ];
                 
+                $products[] = (object)$insert;
+                
                 OrderProducts::create($insert);
 			}
 			
@@ -923,6 +930,15 @@ class TelegramController extends Controller{
 			$date = date("m.d.Y", $time);
 			
 			$answer = __('telegram.order_info', ["id" => $order->id, "date" => $date, "amount" => $total]);
+			
+			//
+			
+			$file = $this->generateExcel($order, $products);
+			
+			if($file){
+				$order->file = $file;
+				$order->save();
+			}
 		}else{
 			$answer = __('telegram.empty_cart');
 		}
@@ -952,6 +968,27 @@ class TelegramController extends Controller{
 		if($order_insert){
 			$this->sendMessages(["id" => $order->id, "date" => $date, "amount" => $total], 'new_order', true);
 		}
+	}
+	
+	function generateExcel($order, $products){
+		$document = new \PHPExcel();
+		
+		$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
+		
+		$columnPosition = 1; // Начальная координата x
+		$startLine		= 4; // Начальная координата y
+		
+		// Вставляем заголовок в "B4" 
+		$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, __('telegram.excel.client', ['client' => $order->username]));
+		
+		// Выравниваем по центру
+		$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		
+		// Объединяем ячейки "B8:D8"
+		$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
+		
+		$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
+		$objWriter->save("invoice-".$order->id.".xls");
 	}
 	
 	// додавання в корзину

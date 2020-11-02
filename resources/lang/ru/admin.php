@@ -228,6 +228,7 @@ return [
             'canceled'				=> 'Аннулировано'
         ],
 		'name'					=> 'Имя',
+		'username'				=> 'Логин',
 		'phone'					=> 'Телефон',
 		'amount'				=> 'Сумма',
 		'address'				=> 'Адрес',

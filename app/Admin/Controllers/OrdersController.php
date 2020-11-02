@@ -130,7 +130,9 @@ class OrdersController extends MyAdminController {
 					->default('new')
 					->rules('required');
 			
-			$form->text('name'				, __('admin.orders.name'))->rules('required|min:2|max:50');
+			$form->text('name'				, __('admin.orders.name'))->rules('required|min:2|max:100');
+			$form->text('username'			, __('admin.orders.username'))->rules('required|min:2|max:30');
+			
 			$form->text('phone'				, __('admin.orders.phone'))->rules('max:25');
 			$form->text('amount'			, __('admin.orders.amount'))->help(__('admin.products.uah'));
 			
