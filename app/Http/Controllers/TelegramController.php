@@ -1015,7 +1015,7 @@ class TelegramController extends Controller{
             if($product->amount > 10){
                 $keyboard[] = [
                     [
-                        "text"		    => __('telegram.more'),
+                        "text"		    => __('telegram.more_count'),
                         "callback_data" => 'more-'.$product->id
                     ]
                 ];
