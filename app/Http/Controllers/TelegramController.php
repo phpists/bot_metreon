@@ -968,21 +968,24 @@ class TelegramController extends Controller{
 
         if($product){
             $answer = __('telegram.select_count');
-
-            $keyboard[] = [
-                [
-                    "text"			=> 1,
-                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=1'
-                ]
-            ];
-
-            if($product->amount > 1){
-                $keyboard[0][] = [
-                    "text"			=> 2,
-                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=2'
+            
+            $n = 0;
+            
+            for($i = 1; $i <= $product->amount; $i++){
+                if(!isset($keyboard[$n])){
+                    $keyboard[$n] = [];
+                }
+                
+                $keyboard[$n][] = [
+                    "text"			=> $i,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count='.$i
                 ];
+                
+                if(($i % 2) == 0){
+                    $n++;
+                }
             }
-
+            
             $keyboard[] = [
                 [
                     "text"		    => __('telegram.back'),
