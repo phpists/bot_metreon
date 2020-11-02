@@ -914,12 +914,21 @@ class TelegramController extends Controller{
             }
         }
         
-        $items[] = [
-            [
-                "text"		    => __('telegram.back'),
-                "callback_data" => $params['type'].'-'.$id
-            ]
-        ];
+        if($params['type'] == 'cat'){
+            $items[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => 'cat'
+                ]
+            ];
+        }else{
+            $items[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => 'cat-'.$id
+                ]
+            ];
+        }
         
         $inline_keyboard = json_encode([
 			'inline_keyboard'	=> $items
