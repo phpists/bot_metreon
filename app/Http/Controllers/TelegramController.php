@@ -1013,8 +1013,6 @@ class TelegramController extends Controller{
 		$sheet->getStyle('D10')->applyFromArray($styleArray);
 		$sheet->getStyle('E10')->applyFromArray($styleArray);
 		
-		\PhpOffice\PhpSpreadsheet\Style\Font->setBold(true);
-		
 		$start = 11;
 		
 		foreach($products as $item){
