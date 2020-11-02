@@ -131,37 +131,8 @@ class TelegramController extends Controller{
                     return response()->json([], 200);
                 }
                 
-                if($text == "Кошик"){
+                if($text == "Корзина"){
                     $this->commandCart($telegram, $chat_id);
-                }
-                
-                if($text == "Оформити"){
-                    $this->commandOrder($telegram, $chat_id, $result);
-                }
-                
-                if($text == "Очистити"){
-                    \Cart::session($chat_id);
-                    \Cart::clear();
-                    
-                    $answer = "🛒 Кошик очищено\nПовертаємось у Головне меню ↩️";
-                    
-                    $keyboard	= [
-                        []
-                    ];
-                    
-                    $reply_markup = $telegram->replyKeyboardMarkup([
-                        'keyboard'			=> $keyboard, 
-                        'resize_keyboard'	=> true, 
-                        'one_time_keyboard'	=> true
-                    ]);
-                    
-                    $telegram->sendMessage([
-                        'chat_id'		=> $chat_id, 
-                        'text'			=> $answer,
-                        'reply_markup'	=> $reply_markup
-                    ]);
-                    
-                    return;
                 }
             }
 		}
@@ -710,6 +681,42 @@ class TelegramController extends Controller{
 				'reply_markup'	=> $inline_keyboard
 			]
 		);
+		
+		//
+		
+		\Cart::session($chat_id);
+		$total = \Cart::getTotal();
+		
+		if($total){
+			$keyboard = [];
+			
+			$keyboard[] = [
+				[
+					"text"				=> __('telegram.go_to_cart'),
+					"callback_data"		=> 'cart'
+				]
+			];
+			
+			$keyboard[] = [
+				[
+					"text"				=> __('telegram.order_btn'),
+					"callback_data"		=> 'order'
+				]
+			];
+			
+			$inline_keyboard = json_encode([
+				'inline_keyboard'	=> $items
+			]);
+			
+			$this->sendMessage(
+				[
+					'chat_id'		=> $chat_id, 
+					'text'			=> __('telegram.you_also_can'),
+					'parse_mode'	=> 'Markdown',
+					'reply_markup'	=> $inline_keyboard
+				]
+			);
+		}
     }
     
     function commandSubcategoryList(&$telegram, $result, $chat_id, $id){
@@ -746,6 +753,18 @@ class TelegramController extends Controller{
                 "callback_data" => 'start'
             ]
         ];
+        
+        \Cart::session($chat_id);
+		$total = \Cart::getTotal();
+		
+		if($total){
+			$items[] = [
+				[
+					"text"				=> __('telegram.go_to_cart'),
+					"callback_data"		=> 'cart'
+				]
+			];
+		}
         
 		$inline_keyboard = json_encode([
 			'inline_keyboard'	=> $items
