@@ -150,7 +150,7 @@ class ProductsController extends MyAdminController {
 			
 			if(count($tmp)){
 				foreach($tmp as $item){
-					$subcategory[] = '('.$category[$item->cat_id].') '.$item->name;
+					$subcategory[$item->id] = '('.$category[$item->cat_id].') '.$item->name;
 				}
 			}
 			
