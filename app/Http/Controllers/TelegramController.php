@@ -27,7 +27,8 @@ use App\Models\Admins;
 
 use Darryldecode\Cart\Cart;
 
-//use PHPOffice\PHPExcel;
+//use PhpOffice\PhpSpreadsheet\Spreadsheet;
+//use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TelegramController extends Controller{
 	
@@ -975,7 +976,7 @@ class TelegramController extends Controller{
 			mkdir(ROOT."/storage/invoice");
 		}
 		
-		$spreadsheet = new Spreadsheet();
+		$spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
 		
 		$sheet = $spreadsheet->getActiveSheet(); // Выбираем первый лист в документе
 		
