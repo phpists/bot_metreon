@@ -134,7 +134,7 @@ class OrdersController extends MyAdminController {
 			$form->text('phone'				, __('admin.orders.phone'))->rules('max:25');
 			$form->text('amount'			, __('admin.orders.amount'))->help(__('admin.products.uah'));
 			
-			$form->file('file'				, __('admin.orders.invoice'))->move('invoice')->uremovable()->niqueName()->downloadable();
+			$form->file('file'				, __('admin.orders.invoice'))->move('invoice')->removable()->uniqueName()->downloadable();
 		});
 		
 		$form->tab(__('admin.orders.products')	, function($form) use ($id){
