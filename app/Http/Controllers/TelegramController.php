@@ -963,9 +963,9 @@ class TelegramController extends Controller{
                             DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
                         )
                         ->first();
-
+        
         $keyboard = [];
-
+        
         if($product){
             if($product->amount < 11){
                 $answer = __('telegram.select_count');
@@ -998,7 +998,7 @@ class TelegramController extends Controller{
             ];
         }else{
             $answer = __('telegram.product_not_found');
-
+            
             $keyboard[] = [
                 [
                     "text"		    => __('telegram.main'),
@@ -1006,11 +1006,11 @@ class TelegramController extends Controller{
                 ]
             ];
         }
-
+        
         $keyboard = json_encode([
 			'inline_keyboard'	=> $keyboard
 		]);
-
+        
         $this->sendMessage(
 			[
 				'chat_id'		=> $chat_id,
