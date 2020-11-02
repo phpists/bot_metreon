@@ -133,6 +133,8 @@ class OrdersController extends MyAdminController {
 			$form->text('name'				, __('admin.orders.name'))->rules('required|min:2|max:50');
 			$form->text('phone'				, __('admin.orders.phone'))->rules('max:25');
 			$form->text('amount'			, __('admin.orders.amount'))->help(__('admin.products.uah'));
+			
+			$form->file('file'				, __('admin.orders.invoice'))->move('invoice')->uremovable()->niqueName()->downloadable();
 		});
 		
 		$form->tab(__('admin.orders.products')	, function($form) use ($id){

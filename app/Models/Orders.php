@@ -20,7 +20,8 @@ class Orders extends Model{
 		'phone',
 		'amount',
 		'chat_id',
-		'client_id'
+		'client_id',
+		'file'
 	];
 	
 	public function products(){
