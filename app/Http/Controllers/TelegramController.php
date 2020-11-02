@@ -285,7 +285,7 @@ class TelegramController extends Controller{
 				if($command == 'cart'){
 					$chat_id	= $result["callback_query"]["from"]["id"];
 					
-					$this->commandCart($telegram, $chat_id, false);
+					$this->commandCart($telegram, $chat_id);
 					
 					return;
 				}
@@ -689,7 +689,7 @@ class TelegramController extends Controller{
 			];
 			
 			$inline_keyboard = json_encode([
-				'inline_keyboard'	=> $items
+				'inline_keyboard'	=> $keyboard
 			]);
 			
 			//
