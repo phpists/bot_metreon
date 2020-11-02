@@ -876,6 +876,18 @@ class TelegramController extends Controller{
     }
     
     function commandProducts(&$telegram, $chat_id, $id, $params){
+        $time = time();
+		$dir = CACHE_PATH.'/data';
+		
+		if(!is_dir($dir)){
+			mkdir($dir);
+		}
+        
+        file_put_contents($dir.'/'.$time.'.result', print_r($params, true));
+        file_put_contents($dir.'/'.$time.'.result', "\n", FILE_APPEND);
+        file_put_contents($dir.'/'.$time.'.result', $id, FILE_APPEND);
+        file_put_contents($dir.'/'.$time.'.result', "\n", FILE_APPEND);
+        
         $query = Products::query()
                         ->where('products.public', '1')
                         ->whereRaw('products.amount > 0')
@@ -929,6 +941,8 @@ class TelegramController extends Controller{
                 ]
             ];
         }
+        
+        file_put_contents($dir.'/'.$time.'.result', print_r($items, true));
         
         $inline_keyboard = json_encode([
 			'inline_keyboard'	=> $items
