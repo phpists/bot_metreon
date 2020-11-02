@@ -56,6 +56,6 @@ return [
     
     'product_info'              	=> ":count шт. x :price₽  = :amount₽",
     
-    'remove_btn'             		=> "Удалить",
-    'order_btn'                  	=> "Оформить накладную ⇧",
+    'remove_btn'             		=> "Удалить⮭",
+    'order_btn'                  	=> "Оформить накладную",
 ];
