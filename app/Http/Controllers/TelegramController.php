@@ -1269,7 +1269,7 @@ class TelegramController extends Controller{
         //$sheet->getRowDimension('10')->setRowHeight(100);
         //$sheet->getRowDimension('4')->setRowHeight(100);
         
-        $sheet->getRowDimension('8')->setRowHeight(40);
+        $sheet->getRowDimension('8')->setRowHeight(40)->setOutlineLevel(2);
         
         $sheet->getRowDimension('10')->setRowHeight(25);
         
