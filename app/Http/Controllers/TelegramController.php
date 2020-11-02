@@ -971,6 +971,10 @@ class TelegramController extends Controller{
 	}
 	
 	function generateExcel($order, $products){
+		if(!is_dir(ROOT."/storage/invoice")){
+			mkdir(ROOT."/storage/invoice");
+		}
+		
 		$document = new \PHPExcel();
 		
 		$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
@@ -988,7 +992,9 @@ class TelegramController extends Controller{
 		//$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
 		
 		$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
-		$objWriter->save("invoice-".$order->id.".xls");
+		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xls");
+		
+		return "invoice/invoice-".$order->id.".xls";
 	}
 	
 	// додавання в корзину
