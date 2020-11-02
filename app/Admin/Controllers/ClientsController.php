@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Clients;
+use App\Models\Category;
 
 use App\Admin\Controllers\MyAdminController;
 
@@ -142,7 +143,33 @@ class ClientsController extends MyAdminController {
             //$form->phone		= trim($form->phone);
             
             $form->phone 	    = (string)preg_replace('/[^0-9]/', '', $form->phone);
+            
+            if($form->chat_id && $form->status != "new"){
+                $client = Clients::query()->where('chat_id', $form->chat_id)->first();
+                
+                if($client){
+                    if($form->status != $client->status){
+                        $this->sendMessage([
+                            'chat_id'		=> $form->chat_id, 
+                            'text'			=> __('telegram.request_'.$form->status)
+                        ]);
+                    }
+                }else{
+                    $this->sendMessage([
+                        'chat_id'		=> $form->chat_id, 
+                        'text'			=> __('telegram.request_'.$form->status)
+                    ]);
+                }
+                
+                if($form->status == "approved"){
+                    $this->commandCategoryList($form->chat_id);
+                }
+            }
 		});
+        
+        $form->saved(function(Form $form){
+            
+        });
 		
         return $form;
     }
@@ -158,10 +185,65 @@ class ClientsController extends MyAdminController {
                 'chat_id'		=> $client->chat_id, 
                 'text'			=> __('telegram.request_approved')
             ]);
+            
+            $this->commandCategoryList($client->chat_id);
         }
         
         header("Location: /clients");
         return;
+    }
+    
+    function commandCategoryList($chat_id){
+        $items = [];
+		
+		$cat = Category::query()->where('category.public', '1')
+								->orderBy('category.sort', 'asc')
+								->select(
+									DB::raw('category.*'), 
+                                    DB::raw('(SELECT COUNT(`subcategory`.`id`) FROM `subcategory` WHERE `subcategory`.`cat_id` = `category`.`id` AND `subcategory`.`public` = 1) as `count_sub`'),
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
+								)
+								->get();
+		
+		if(count($cat)){
+			foreach($cat as $item){
+				$item->count_sub        = (int)$item->count_sub;
+				$item->count_products   = (int)$item->count_products;
+                
+				if(!$item->count_sub && !$item->count_products){
+					continue;
+				}
+				
+                if($item->count_sub){
+                    $items[] = [
+                        [
+                            "text"								=> $item->name,
+                            "callback_data"                     => 'cat-'.$item->id
+                        ]
+                    ];
+                }else{
+                    $items[] = [
+                        [
+                            "text"								=> $item->name,
+                            "switch_inline_query_current_chat"	=> 'cat-'.$item->id
+                        ]
+                    ];
+                }
+			}
+		}
+        
+		$inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+		
+		$this->sendMessage(
+			[
+				'chat_id'		=> $chat_id, 
+				'text'			=> __('telegram.select_category'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
     }
     
     private function sendMessage($send, $method = "sendMessage", $post = true, $json = true){
