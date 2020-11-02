@@ -975,15 +975,12 @@ class TelegramController extends Controller{
 			mkdir(ROOT."/storage/invoice");
 		}
 		
-		$document = new \PHPExcel();
+		$spreadsheet = new Spreadsheet();
 		
-		//$sheet = $document->setActiveSheetIndex(0); // Выбираем первый лист в документе
+		$sheet = $spreadsheet->getActiveSheet(); // Выбираем первый лист в документе
 		
-		$columnPosition = 1; // Начальная координата x
-		$startLine		= 4; // Начальная координата y
-		
-		// Вставляем заголовок в "B4" 
-		//$sheet->setCellValueByColumnAndRow($columnPosition, $startLine, __('telegram.excel.client', ['client' => $order->username]));
+		// Вставляем заголовок в "B4"
+		$sheet->setCellValue('B4', __('telegram.excel.client', ['client' => $order->username]));
 		
 		// Выравниваем по центру
 		//$sheet->getStyleByColumnAndRow($columnPosition, $startLine)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -991,7 +988,7 @@ class TelegramController extends Controller{
 		// Объединяем ячейки "B8:D8"
 		//$document->getActiveSheet()->mergeCellsByColumnAndRow(1, 8, 3, 1);
 		
-		$objWriter = \PHPExcel_IOFactory::createWriter($document, 'Excel5');
+		$objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($document, 'xls');
 		$objWriter->save(ROOT."/storage/invoice/invoice-".$order->id.".xls");
 		
 		return "invoice/invoice-".$order->id.".xls";
