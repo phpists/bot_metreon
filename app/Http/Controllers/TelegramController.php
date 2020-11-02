@@ -1306,19 +1306,19 @@ class TelegramController extends Controller{
 	function commandRemove(&$telegram, $result, $chat_id, $id, $hash){
 		\Cart::session($chat_id);
 		
-		$product = Products::query()
+		if(\Cart::get($id)){
+			\Cart::remove($id);
+		}
+		
+        if($hash != "mini"){
+            $product = Products::query()
 							->where('products.id', $id)
 							->select(
 								'products.cat_id',
 								'products.sub_id'
 							)
 							->first();
-		
-		if(\Cart::get($product->id)){
-			\Cart::remove($product->id);
-		}
-		
-        if($hash != "mini"){
+            
             $keyboard	= [
                 [
                     [
