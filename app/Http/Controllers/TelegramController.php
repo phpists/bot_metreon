@@ -188,6 +188,26 @@ class TelegramController extends Controller{
 							$this->commandAdd($telegram, $chat_id, $id, $params);
 						}
 					}
+
+                    if($command == 'products'){
+                        $hash = explode("&", $hash);
+
+						$params = ['type' => ''];
+
+						foreach($hash as $h){
+							$h = explode("=", $h);
+
+							if(isset($h[1])){
+								$params[$h[0]] = $h[1];
+							}
+						}
+
+                        $this->commandProducts($telegram, $chat_id, $id, $params);
+                    }
+
+                    if($command == 'product'){
+                        $this->commandProduct($telegram, $chat_id, $id);
+                    }
 				}
 			}else{
 				$command	= $command[0];
@@ -728,16 +748,17 @@ class TelegramController extends Controller{
                 if($item->count_sub){
                     $items[] = [
                         [
-                            "text"								=> $item->name,
-                            "callback_data"                     => 'cat-'.$item->id
+                            "text"		    => $item->name,
+                            "callback_data" => 'cat-'.$item->id
                             //"switch_inline_query_current_chat"	=> 'cat-'.$item->id
                         ]
                     ];
                 }else{
                     $items[] = [
                         [
-                            "text"								=> $item->name,
-                            "switch_inline_query_current_chat"	=> 'cat-'.$item->id
+                            "text"		    => $item->name,
+                            "callback_data" => 'products-'.$item->id.'#type=cat'
+                            //"switch_inline_query_current_chat"	=> 'cat-'.$item->id
                         ]
                     ];
                 }
@@ -817,8 +838,9 @@ class TelegramController extends Controller{
 
 				$items[] = [
 					[
-						"text"								=> $item->name,
-						"switch_inline_query_current_chat"	=> 'sub-'.$item->id
+						"text"		    => $item->name,
+                        "callback_data" => 'products-'.$item->id.'#type=sub'
+						//"switch_inline_query_current_chat"	=> 'sub-'.$item->id
 					]
 				];
 			}
@@ -851,6 +873,141 @@ class TelegramController extends Controller{
 			[
 				'chat_id'		=> $chat_id,
 				'text'			=> __('telegram.select_subcategory'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+
+    function commandProducts(&$telegram, $chat_id, $id, $params){
+        $query = Products::query()
+                        ->where('products.public', '1')
+                        ->whereRaw('products.amount > 0')
+                        ->select(
+                            DB::raw('products.*')
+                            //DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
+                            //DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
+                        );
+
+        if($params['type'] == 'cat'){
+            $query->where('products.cat_id', $id);
+        }else{
+            $query->where('products.sub_id', $id);
+        }
+
+        $tmp = $query->get();
+
+        $items = [];
+
+        if(count($tmp)){
+            foreach($tmp as $item){
+                $columns = [];
+
+                $columns[] = $item->name;
+
+                if($item->price){
+                    $columns[] = $item->price." ".__('telegram.rub');
+                }
+
+                $items[] = [
+                    [
+                        "text"		    => implode(' - ', $columns),
+                        "callback_data" => 'product-'.$item->id
+                    ]
+                ];
+            }
+        }
+
+        if($params['type'] == 'cat'){
+            $items[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => 'cat'
+                ]
+            ];
+        }else{
+            $sub = SubCategory::query()
+                                ->where('id', $id)
+								->first();
+
+            $items[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => 'cat-'.$sub->cat_id
+                ]
+            ];
+        }
+
+        $inline_keyboard = json_encode([
+			'inline_keyboard'	=> $items
+		]);
+
+        $this->sendMessage(
+			[
+				'chat_id'		=> $chat_id,
+				'text'			=> __('telegram.select_a_product'),
+				'parse_mode'	=> 'Markdown',
+				'reply_markup'	=> $inline_keyboard
+			]
+		);
+    }
+
+    function commandProduct(&$telegram, $chat_id, $id){
+        $product = Products::query()
+                        ->where('products.public', '1')
+                        ->whereRaw('products.amount > 0')
+                        ->where('products.id', $id)
+                        ->select(
+                            DB::raw('products.*'),
+                            DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
+                            DB::raw('(SELECT `subcategory`.`name` FROM `subcategory` WHERE `subcategory`.`id` = `products`.`sub_id`) as `subcategory_name`')
+                        )
+                        ->first();
+
+        $keyboard = [];
+
+        if($product){
+            $answer = __('telegram.select_count');
+
+            $keyboard[] = [
+                [
+                    "text"			=> 1,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=1'
+                ]
+            ];
+
+            if($product->amount > 1){
+                $keyboard[0][] = [
+                    "text"			=> 2,
+                    "callback_data"	=> 'data-'.$product->id.'#type=count&count=2'
+                ];
+            }
+
+            $keyboard[] = [
+                [
+                    "text"		    => __('telegram.back'),
+                    "callback_data" => $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
+                ]
+            ];
+        }else{
+            $answer = __('telegram.product_not_found');
+
+            $keyboard[] = [
+                [
+                    "text"		    => __('telegram.main'),
+                    "callback_data" => 'start'
+                ]
+            ];
+        }
+
+        $inline_keyboard = json_encode([
+			'inline_keyboard'	=> $keyboard
+		]);
+
+        $this->sendMessage(
+			[
+				'chat_id'		=> $chat_id,
+				'text'			=> $answer,
 				'parse_mode'	=> 'Markdown',
 				'reply_markup'	=> $inline_keyboard
 			]
@@ -1248,7 +1405,8 @@ class TelegramController extends Controller{
 			[
 				[
 					"text"		    => __('telegram.back'),
-					"switch_inline_query_current_chat"	=> $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
+                    "callback_data" => $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
+					//"switch_inline_query_current_chat"	=> $product->sub_id ? 'sub-'.$product->sub_id : 'cat-'.$product->cat_id
 				]
 			]
 		];
@@ -1299,7 +1457,8 @@ class TelegramController extends Controller{
                 [
                     [
                         "text"		    => __('telegram.back'),
-                        "switch_inline_query_current_chat"	=> 'sub-'.$product->sub_id
+                        "callback_data" => 'sub-'.$product->sub_id
+                        //"switch_inline_query_current_chat"	=> 'sub-'.$product->sub_id
                     ]
                 ]
             ];
