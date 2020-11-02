@@ -934,10 +934,14 @@ class TelegramController extends Controller{
                 ]
             ];
         }else{
+            $sub = SubCategory::query()
+                                ->where('id', $id)
+								->first();
+            
             $items[] = [
                 [
                     "text"		    => __('telegram.back'),
-                    "callback_data" => 'cat-'.$id
+                    "callback_data" => 'cat-'.$sub->cat_id
                 ]
             ];
         }
