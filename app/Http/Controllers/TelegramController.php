@@ -967,9 +967,9 @@ class TelegramController extends Controller{
         $keyboard = [];
 
         if($product){
-            $answer = __('telegram.select_count');
-            
             if($product->amount < 11){
+                $answer = __('telegram.select_count');
+                
                 $n = 0;
                 
                 for($i = 1; $i <= $product->amount; $i++){
@@ -986,6 +986,8 @@ class TelegramController extends Controller{
                         $n++;
                     }
                 }
+            }else{
+                $answer = __('telegram.enter_count');
             }
             
             $keyboard[] = [
@@ -1005,7 +1007,7 @@ class TelegramController extends Controller{
             ];
         }
 
-        $inline_keyboard = json_encode([
+        $keyboard = json_encode([
 			'inline_keyboard'	=> $keyboard
 		]);
 
@@ -1014,7 +1016,7 @@ class TelegramController extends Controller{
 				'chat_id'		=> $chat_id,
 				'text'			=> $answer,
 				'parse_mode'	=> 'Markdown',
-				'reply_markup'	=> $inline_keyboard
+				'reply_markup'	=> $keyboard
 			]
 		);
     }
