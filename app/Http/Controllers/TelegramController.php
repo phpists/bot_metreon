@@ -1177,7 +1177,7 @@ class TelegramController extends Controller{
 			\Cart::clear();
 
 			$time = strtotime($order_insert["created_at"]);
-			$date = date("m.d.Y", $time);
+			$date = date("d.m.Y", $time);
 
 			$answer = __('telegram.order_info', ["id" => $order->id, "date" => $date, "amount" => $total]);
 
