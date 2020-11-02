@@ -1043,15 +1043,21 @@ class TelegramController extends Controller{
 				[
 					"text"		    => __('telegram.remove_btn'),
 					"callback_data" => 'remove-'.$product->id
-				],
+				]
+			],
+			[
 				[
 					"text"		    => __('telegram.order_btn'),
 					"callback_data" => 'order'
-				],
+				]
+			],
+			[
 				[
 					"text"		    => __('telegram.category_btn'),
 					"callback_data" => 'start'
-				],
+				]
+			],
+			[
 				[
 					"text"		    => __('telegram.back'),
 					"switch_inline_query_current_chat"	=> 'sub-'.$product->sub_id
