@@ -1010,7 +1010,7 @@ class TelegramController extends Controller{
                 
                 OrderProducts::create($insert);
                 
-                DB::update('update `products` set `amount` = `amount`-'.$item->quantity.' where `id` = ?', [$item->id]);
+                DB::update('update `products` set `amount` = `amount` - '.$item->quantity.' where `id` = ?', [$item->id]);
                 
                 $insert["name"] = $item->name;
                 
