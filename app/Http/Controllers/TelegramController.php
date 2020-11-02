@@ -45,18 +45,9 @@ class TelegramController extends Controller{
 			return false;
 		}
         
-        $time = time();
-		$dir = CACHE_PATH.'/data';
-		
-		if(!is_dir($dir)){
-			mkdir($dir);
-		}
-        
         $telegram = new Api($key);
         
         $result = $telegram->getWebhookUpdates();
-        
-        file_put_contents($dir.'/'.$time.'.result', print_r($result, true));
         
         $text		= isset($result["message"]["text"]) ? $result["message"]["text"] : "";
         $chat_id	= isset($result["message"]["chat"]["id"]) ? $result["message"]["chat"]["id"] : 0;
