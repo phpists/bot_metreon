@@ -87,7 +87,7 @@ class TelegramController extends Controller{
                         if($text != "/reset"){
                             $params = ['type' => '', 'count' => $text];
                             
-                            $this->commandAdd($telegram, $chat_id, $id, $params);
+                            $this->commandAdd($telegram, $chat_id, $message->product_id, $params);
                             
                             $message    = null;
                             $text       = null;
