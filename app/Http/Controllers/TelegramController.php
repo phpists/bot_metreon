@@ -155,55 +155,6 @@ class TelegramController extends Controller{
 				$telegram->answerCallbackQuery($answer);
 				
 				if($id > 0){
-					if($command == 'product'){
-						$product = Products::query()
-											->leftJoin('category', 'category.id', '=', 'products.cat_id')
-											->where('products.public', '1')
-											->where('products.id', $id)
-											->select(DB::raw('products.*'), 'category.name as cat_name')
-											->first();
-						
-						if($product){
-						}
-						
-						if(!$product){
-							$answer = "Товар не знайдено";
-							
-							$reply_markup = $telegram->replyKeyboardHide([
-								'hide_keyboard' => true,
-								'selective'     => false,
-							]);
-							
-							$telegram->sendMessage([
-								'chat_id'				=> $chat_id, 
-								'text'					=> $answer,
-								'reply_markup'			=> $reply_markup,
-								'reply_to_message_id'	=> $result["callback_query"]["inline_message_id"]
-							]);
-							
-							//
-							
-							$answer = "Повертаємось у Головне меню ↩️";
-							
-							$keyboard	= [
-								[
-								]
-							];
-							
-							$reply_markup = $telegram->replyKeyboardMarkup([
-								'keyboard'			=> $keyboard, 
-								'resize_keyboard'	=> true, 
-								'one_time_keyboard'	=> true
-							]);
-							
-							$telegram->sendMessage([
-								'chat_id'		=> $chat_id, 
-								'text'			=> $answer,
-								'reply_markup'	=> $reply_markup
-							]);
-						}
-					}
-                    
                     if($command == 'approved'){
                         $this->commandApproved($telegram, $result, $chat_id, $id);
                     }
@@ -307,6 +258,7 @@ class TelegramController extends Controller{
                     $tmp = Products::query()
                                     ->where('products.public', '1')
                                     ->where('products.sub_id', $id)
+                                    ->whereRaw('products.amount > 0')
                                     ->select(
                                         DB::raw('products.*'), 
                                         DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
@@ -356,10 +308,6 @@ class TelegramController extends Controller{
                                     [
                                         "text"			=> 1,
                                         "callback_data"	=> 'data-'.$item->id.'#type=count&count=1'
-                                    ],
-                                    [
-                                        "text"			=> 2,
-                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
                                     ]
                                 ],
                                 [
@@ -369,6 +317,13 @@ class TelegramController extends Controller{
                                     ]
                                 ]
                             ];
+                            
+                            if($item->amount > 1){
+                                $keyboard[0][] = [
+                                    "text"			=> 2,
+                                    "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
+                                ];
+                            }
                             
                             $inline_keyboard = [
                                 'inline_keyboard'	=> $keyboard
@@ -398,6 +353,7 @@ class TelegramController extends Controller{
                     $tmp = Products::query()
                                     ->where('products.public', '1')
                                     ->where('products.cat_id', $id)
+                                    ->whereRaw('products.amount > 0')
                                     ->select(
                                         DB::raw('products.*'), 
                                         DB::raw('(SELECT `category`.`name` FROM `category` WHERE `category`.`id` = `products`.`sub_id`) as `category_name`'),
@@ -447,10 +403,6 @@ class TelegramController extends Controller{
                                     [
                                         "text"			=> 1,
                                         "callback_data"	=> 'data-'.$item->id.'#type=count&count=1'
-                                    ],
-                                    [
-                                        "text"			=> 2,
-                                        "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
                                     ]
                                 ],
                                 [
@@ -460,6 +412,13 @@ class TelegramController extends Controller{
                                     ]
                                 ]
                             ];
+                            
+                            if($item->amount > 1){
+                                $keyboard[0][] = [
+                                    "text"			=> 2,
+                                    "callback_data"	=> 'data-'.$item->id.'#type=count&count=2'
+                                ];
+                            }
                             
                             $inline_keyboard = [
                                 'inline_keyboard'	=> $keyboard
@@ -753,7 +712,7 @@ class TelegramController extends Controller{
 								->select(
 									DB::raw('category.*'), 
                                     DB::raw('(SELECT COUNT(`subcategory`.`id`) FROM `subcategory` WHERE `subcategory`.`cat_id` = `category`.`id` AND `subcategory`.`public` = 1) as `count_sub`'),
-									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1) as `count_products`')
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`cat_id` = `category`.`id` AND `products`.`public` = 1 AND `products`.`amount` > 0) as `count_products`')
 								)
 								->get();
 		
@@ -844,7 +803,7 @@ class TelegramController extends Controller{
 								->orderBy('subcategory.sort', 'asc')
 								->select(
 									DB::raw('subcategory.*'), 
-									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`sub_id` = `subcategory`.`id` AND `products`.`public` = 1) as `count_products`')
+									DB::raw('(SELECT COUNT(`products`.`id`) FROM `products` WHERE `products`.`sub_id` = `subcategory`.`id` AND `products`.`public` = 1 AND `products`.`amount` > 0) as `count_products`')
 								)
 								->get();
 		
@@ -1050,6 +1009,8 @@ class TelegramController extends Controller{
                 ];
                 
                 OrderProducts::create($insert);
+                
+                DB::update('update `products` set `amount` = `amount`-'.$item->quantity.' where `id` = ?', [$item->id]);
                 
                 $insert["name"] = $item->name;
                 
