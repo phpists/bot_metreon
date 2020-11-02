@@ -55,7 +55,7 @@ class ClientsController extends MyAdminController {
 			return '-';
 		});
 		
-		$grid->column('address'			, __('admin.clients.address'));
+		//$grid->column('address'			, __('admin.clients.address'));
 		
         $grid->column('status'			, __('admin.clients.status.label'))->display(function($status){
             if($status){
@@ -77,7 +77,7 @@ class ClientsController extends MyAdminController {
 			$filter->like('name'			, __('admin.clients.name'));
 			$filter->like('username'		, __('admin.clients.username'));
 			$filter->like('phone'			, __('admin.clients.phone'));
-			$filter->like('address'			, __('admin.clients.address'));
+			//$filter->like('address'			, __('admin.clients.address'));
             
             $filter->equal('status'			, __('admin.clients.status.label'))->radio([
                 null        => __('admin.filter-all'), 
@@ -113,7 +113,7 @@ class ClientsController extends MyAdminController {
         
         $form->text('phone'			, __('admin.clients.phone'))->rules('max:21');
 		
-		$form->text('address'		, __('admin.clients.address'))->rules('max:200');
+		//$form->text('address'		, __('admin.clients.address'))->rules('max:200');
         
         $form->decimal('chat_id'	, __('admin.clients.chat_id'));
         
@@ -131,6 +131,8 @@ class ClientsController extends MyAdminController {
 		// callback before save
 		$form->saving(function (Form $form){
 			$form->name			= trim($form->name);
+            $form->username		= trim($form->username);
+            $form->phone		= trim($form->phone);
 		});
 		
         return $form;
