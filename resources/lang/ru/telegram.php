@@ -28,7 +28,7 @@ return [
         'rejected'  => 'Отказать'
     ],
     
-    'request_approved'              => 'Вашу заявку одобрено',
+    'request_approved'              => 'Ваша заявка обработана, приступайте к заказам!',
     'request_rejected'              => 'В вашей заявке отказано',
     
     'request_alredy_approved'       => 'Заявка уже одобрена',
@@ -36,7 +36,7 @@ return [
     
     'request_not_found'             => 'Заявка не найдена',
     
-    'request_processed'             => 'Ваша заявка обработана, приступайте к заказам!',
+    'request_processed'             => 'Заявка обработана',
     
     'request_being_processed'       => 'Ваша заявка на обработке',
     
