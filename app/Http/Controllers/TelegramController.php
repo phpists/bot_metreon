@@ -848,7 +848,7 @@ class TelegramController extends Controller{
 			]);
 		}else{
 			$answer .= "\n";
-			$answer .= __('telegram.cart_title');
+			$answer .= __('telegram.empty_cart');
 			
 			$items = [];
 			
