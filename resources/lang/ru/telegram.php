@@ -54,7 +54,7 @@ return [
     
     'added_to_cart'              	=> 'Добавлено в корзину',
     
-    'product_info'              	=> ":count шт. x :price₽  = :amount₽",
+    'product_info'              	=> ":count шт. x :price ₽ = :amount ₽",
     
     'remove_btn'             		=> "Удалить⮭",
     'order_btn'                  	=> "Оформить накладную",
