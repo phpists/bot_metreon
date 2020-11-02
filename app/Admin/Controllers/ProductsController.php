@@ -151,7 +151,7 @@ class ProductsController extends MyAdminController {
 				}
 			}
 			
-			$form->select('sub_id'		, __('admin.products.subcategory'))->options(($subcategory ? ([0 => ''] + $subcategory) : []))->rules('required');
+			$form->select('sub_id'		, __('admin.products.subcategory'))->options(($subcategory ? ([0 => ''] + $subcategory) : []));
 			
 			$form->image('image'		, __('admin.products.image'))->removable();
 		});
