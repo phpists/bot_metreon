@@ -1268,7 +1268,8 @@ class TelegramController extends Controller{
         
         //$spreadsheet->getActiveSheet()->getRowDimension('10')->setRowHeight(100);
         //$spreadsheet->getActiveSheet()->getRowDimension('4')->setRowHeight(100);
-        //$spreadsheet->getActiveSheet()->getRowDimension('8')->setRowHeight(100);
+        
+        $spreadsheet->getActiveSheet()->getRowDimension('8')->setRowHeight(50);
         
 		$styleArray = array(
 			'font'		=> [],
